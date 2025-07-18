@@ -330,7 +330,7 @@ public class OrdenTrabajo extends DataBase {
             con.setAutoCommit(false);
             String paramMateriales = this.concatenarValores(materiales, cantidades);
             ResultSet res = this.consulta("select proc_orden_trabajo_solucion(" + id_sucursal + ", " + id + ", '" + usuario_solucion + "', '" + fecha_solucion + "', '" + hora_solucion + "', " + solucionado
-                    + ", '" + conformidad + "', '" + atencion + "', '" + recomendacion + "', " + paramMateriales + ", " + set_deviceclave + ")");
+                    + ", " + conformidad + ", " + atencion + ", '" + recomendacion + "', " + paramMateriales + ", " + set_deviceclave + ")");
             if (res.next()) {
                 ok = (res.getString(1) != null) ? res.getBoolean(1) : false;
                 res.close();

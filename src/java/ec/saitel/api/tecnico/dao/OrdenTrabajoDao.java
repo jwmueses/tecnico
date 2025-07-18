@@ -121,8 +121,8 @@ public class OrdenTrabajoDao
                 String ruc = ordenTrabajo.getInstalacion().getRuc();
                 String razon_social = ordenTrabajo.getInstalacion().getRazonSocial();
                 String solucionado = ordenTrabajo.getSolucionado();
-                String conformidad = ordenTrabajo.getConformidad();
-                String atencion = ordenTrabajo.getAtencion();
+                String conformidad = "NULL";
+                String atencion = "NULL";
                 String recomendacion = ordenTrabajo.getRecomendacion();
                 String id_sector = ordenTrabajo.getInstalacion().getIdSector();
                 String ip = ordenTrabajo.getInstalacion().getIp();
@@ -131,6 +131,9 @@ public class OrdenTrabajoDao
                 String direccion = ordenTrabajo.getInstalacion().getDireccionInstalacion();
                 String mac_ant = ordenTrabajo.getMacAnterior().toUpperCase();
                 String receptor_ant = ordenTrabajo.getReceptorAnterior();
+                String equiposRetirados = ordenTrabajo.getEquiposRetirados();
+                String equiposUtilizados = ordenTrabajo.getEquiposUtilizados();
+                
                 String mac_nuevo = ordenTrabajo.getInstalacion().getMac().toUpperCase();
                 String receptor_nuevo = ordenTrabajo.getInstalacion().getReceptor();
                 String set_deviceclave = ordenTrabajo.getInstalacion().getSetDeviceClave();
@@ -246,6 +249,17 @@ public class OrdenTrabajoDao
                         String idsActivos = mac_nuevo.compareTo("") != 0 ? objActivo.getIdActivo(mac_nuevo) + "," : "";
                         //String macs_retiradas = mac_ant.compareTo("")!=0 ? mac_ant+"," : "";
                         String idsActivosRet = mac_ant.compareTo("") != 0 ? objActivo.getIdActivo(mac_ant) + "," : "";
+                        
+                        String axEquiposRetirados[] = equiposRetirados.split(",");
+                        for(int x=0; x<axEquiposRetirados.length; x++){
+                            idsActivosRet += objActivo.getIdActivo( axEquiposRetirados[x] ) + ",";
+                        }
+                        
+                        String axEquiposUtilizados[] = equiposUtilizados.split(",");
+                        for(int x=0; x<axEquiposUtilizados.length; x++){
+                            idsActivos += objActivo.getIdActivo( axEquiposUtilizados[x] ) + ",";
+                        }
+                        
     //                    String codigo_activo = "";
 
                         ////variables para reposiciones
@@ -569,7 +583,7 @@ public class OrdenTrabajoDao
                                         r = "ok";
                                     }
                                 } else {
-                                    r = objActivo.getError() + " " + msg + "^fun»_('btnRegSol').disabled=false";
+                                    r = objActivo.getError() + " - " + objInstalacion.getError() + " " + msg;
                                 }
                                 objActivo.ejecutar("update tbl_instalacion set puesta_tierra=" + puesta_tierra + " where id_instalacion=" + id_instalacion + " ");
                             } else {

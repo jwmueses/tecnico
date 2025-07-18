@@ -40,6 +40,9 @@ public class OrdenTrabajoModel
     private String receptorAnterior;
     private String macAnterior;
     
+    private String equiposRetirados;
+    private String equiposUtilizados;
+    
     private InstalacionModel instalacion;
     private List<MaterialesModel> ordenTrabajoMaterial;
     private List<ReposicionEquiposModel> reposicionEquipos;
@@ -242,6 +245,22 @@ public class OrdenTrabajoModel
 
     public void setMacAnterior(String macAnterior) {
         this.macAnterior = macAnterior;
+    }
+
+    public String getEquiposRetirados() {
+        return equiposRetirados;
+    }
+
+    public void setEquiposRetirados(String equiposRetirados) {
+        this.equiposRetirados = equiposRetirados;
+    }
+
+    public String getEquiposUtilizados() {
+        return equiposUtilizados;
+    }
+
+    public void setEquiposUtilizados(String equiposUtilizados) {
+        this.equiposUtilizados = equiposUtilizados;
     }
 
     public InstalacionModel getInstalacion() {

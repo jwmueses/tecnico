@@ -1108,9 +1108,8 @@ public class Instalacion extends DataBase {
         receptor = (receptor.length() > 39 ? receptor.substring(0, 39) : receptor);
         sql.add("update tbl_instalacion set fecha_instalacion='" + fecha_instalacion + "', receptor='" + receptor + "', mac='" + mac + "', id_activo_personalizacion=" + id_personalizacion + ","
                 + "porcentaje_senal=" + porcentaje_senal + ", antena_acoplada='" + antena_acoplada + "' "+tipoInstalacion+" " + planes
-                + ",conformidad_velocidad=" + conformidad_velocidad + ", conformidad_instalacion='" + conformidad_instalacion + "',"
-                + "conformidad_atencion='" + conformidad_atencion + "', estado_instalacion='" + estado_instalacion + "', "
-                + "ingreso_datos=now()::date, estado_servicio='a', latitud='" + latitud + "', longitud='" + longitud + "',"
+//                + ",conformidad_velocidad=" + conformidad_velocidad + ", conformidad_instalacion='" + conformidad_instalacion + "', conformidad_atencion='" + conformidad_atencion + "'"
+                + ", estado_instalacion='" + estado_instalacion + "', ingreso_datos=now()::date, estado_servicio='a', latitud='" + latitud + "', longitud='" + longitud + "',"
                 + "altura='" + altura + "', altura_antena='" + altura_antena + "',latitud_gps='" + latitud_gps + "',longitud_gps='" + longitud_gps + "' where id_instalacion=" + id_instalacion);
         try {
             int convenioPago = 0;
