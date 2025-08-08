@@ -1019,397 +1019,397 @@ public class FacturaVenta extends DataBase {
     }
     
     
-    public String facturarACredito(String _DOCS_ELECTRONICOS, String requestIP, String ipdocumental, int puertodocumental, String dbdocumental, String usuariodocumental, String clavedocumental,
-            int id_sucursal, String id_punto_emision, String idInstalacion, String subtotal, String subtotal_0, String subtotal_2, String subtotal_3, String descuento, 
-            String iva_2, String iva_3, String total, String descipcion)
-    {
-        
-        String idFactura = "-1";
-        String serie_factura = "";
-        String autorizacion = "1111111111";
-        String fecha_emision = Fecha.getFecha("ISO");
-        String id_cliente = "";
-        String ruc = "";
-        String razon_social = "";
-        String telefono = "";
-        String direccion = "";
-        String email = "";
-        String forma_pago = "d";
-        String id_forma_pago = "99";
-        String banco = "";
-        String num_cheque = "";
-        String num_comp_pago = "";
-        String gastos_bancos = "0";
-        String id_plan_cuenta_banco = "0";
-        String son = NumeroALetras.Convertir(total, false);
-        String tipo_documento_cliente = "06";
-        String id_plan_cuenta_anticipo = "232";
-        String nombreBoucher = "";
-        String idBanco = "0";
-        String id_producto = "";
-
-        /*String bloqueo_libros = "";
-        while(true){
-            bloqueo_libros = conf.getValor("bloqueo_libros");
-            if(bloqueo_libros.compareTo("false")==0) {
-                conf.setValor("bloqueo_libros", "true");
-                break;
-            }
-            try{
-                Thread.sleep(500);
-            }catch(InterruptedException e){
-                e.printStackTrace();
-            }
-        }*/
-        Configuracion conf = new Configuracion(this._ip, this._puerto, this._db, this._usuario, this._clave);
-        
-        Map<String, String> params = conf.getParametros("'clave_certificado', 'ambiente', 'ruc', 'razon_social', 'nombre_comercial', 'num_resolucion',"
-                + " 'oblga_contabilidad', 'dir_matriz', 'desc_venta', 'cxc', 'p_iva1', 'email_info', 'numeros_soporte', 'pagina_web'");
-        
-        String clave_certificado = params.get("clave_certificado");
-        String ambiente = params.get("ambiente");
-//        String tipoEmision = "1"; // 1=normal    2=Indisponibilidad del sistema
-        String ruc_empresa = params.get("ruc");
-        String razon_social_empresa = params.get("razon_social");
-        String nombre_comercial = params.get("nombre_comercial");
-        String email_info = params.get("email_info");
-        String num_contacto = params.get("numeros_soporte");
-        String sitio_web = params.get("pagina_web");
-        String num_resolucion = params.get("num_resolucion");
-        String oblga_contabilidad = params.get("oblga_contabilidad");
-        String dir_matriz = params.get("dir_matriz");
-        String desc_venta = params.get("desc_venta");
-        String cxc = params.get("cxc");
-//        String cuenta_propina = params.get("propina");
-        String pIva = params.get("p_iva1");
-        
-        String tipoEmision = "1";
-        
-//        String clave_certificado = conf.getValor("clave_certificado");
-//        String ambiente = conf.getValor("ambiente");
-//        String tipoEmision = conf.getValor("tipo_emision"); // 1=normal    2=Indisponibilidad del sistema
-//        String cxc = conf.getValor("cxc");
-//        String ruc_empresa = conf.getValor("ruc");
-//        String razon_social_empresa = conf.getValor("razon_social");
-//        String nombre_comercial = conf.getValor("nombre_comercial");
-//        String num_resolucion = conf.getValor("num_resolucion");
-//        String oblga_contabilidad = conf.getValor("oblga_contabilidad");
-//        String dir_matriz = conf.getValor("dir_matriz");
-//        String desc_venta = conf.getValor("desc_venta");
-//        String pIva = conf.getValor("p_iva1");
-        conf.cerrar();
-
-        Sucursal objSucursal = new Sucursal(this._ip, this._puerto, this._db, this._usuario, this._clave);
-        String ubicacionNombreComercial[] = objSucursal.getDireccionDePuntoEmision(String.valueOf(id_punto_emision));
-        String direccion_sucursal = ubicacionNombreComercial[0];
-        nombre_comercial = ubicacionNombreComercial[1].compareTo("")!=0 ? ubicacionNombreComercial[1] : nombre_comercial;
-        email_info = ubicacionNombreComercial[2].compareTo("")!=0 ? ubicacionNombreComercial[2] : email_info;
-        num_contacto = ubicacionNombreComercial[3].compareTo("")!=0 ? ubicacionNombreComercial[3] : num_contacto;
-        sitio_web = ubicacionNombreComercial[4].compareTo("")!=0 ? ubicacionNombreComercial[4] : sitio_web;
-        objSucursal.cerrar();
-        
-        
-        PuntoEmision objPuntoEmision = new PuntoEmision(this._ip, this._puerto, this._db, this._usuario, this._clave);
-        serie_factura = "";
-        try{
-            ResultSet rsCliente = objPuntoEmision.getPuntoEmision(id_punto_emision);
-            if(rsCliente.next()){
-                serie_factura = rsCliente.getString("fac_num_serie")!=null ? rsCliente.getString("fac_num_serie") : "";
-                rsCliente.close();
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-        }finally{
-            objPuntoEmision.cerrar();
-        }
-        
-        
-        Instalacion objInstalacion = new Instalacion(this._ip, this._puerto, this._db, this._usuario, this._clave);
-        try {
-            ResultSet rsInstalacion = objInstalacion.getInstalacion(idInstalacion);
-            if (rsInstalacion.next()) {
-                id_cliente = (rsInstalacion.getString("id_cliente") != null) ? rsInstalacion.getString("id_cliente") : "-1";
-                ruc = (rsInstalacion.getString("ruc") != null) ? rsInstalacion.getString("ruc") : "";
-                razon_social = (rsInstalacion.getString("razon_social") != null) ? rsInstalacion.getString("razon_social") : "";
-                direccion = (rsInstalacion.getString("direccion") != null) ? rsInstalacion.getString("direccion") : "";
-                telefono = (rsInstalacion.getString("telefono") != null) ? rsInstalacion.getString("telefono") : "";
-                email = (rsInstalacion.getString("email") != null) ? rsInstalacion.getString("email") : "";
-                tipo_documento_cliente = rsInstalacion.getString("tipo_documento") != null ? rsInstalacion.getString("tipo_documento") : "06";
-                id_plan_cuenta_anticipo = rsInstalacion.getString("id_plan_cuenta_anticipo") != null ? rsInstalacion.getString("id_plan_cuenta_anticipo") : "232";
-                id_producto = (rsInstalacion.getString("id_producto") != null) ? rsInstalacion.getString("id_producto") : "";
-                rsInstalacion.close();
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-        }finally{
-            objInstalacion.cerrar();
-        }
-        
-        
-        FormaPago objFormaPago = new FormaPago(this._ip, this._puerto, this._db, this._usuario, this._clave);
-        String codigoFormaPago = objFormaPago.getCodigoFormaPago(id_forma_pago);
-        objFormaPago.cerrar();
-        
-        
-
-        FacturaVenta objFacturaVenta = new FacturaVenta(this._ip, this._puerto, this._db, this._usuario, this._clave);
-        long num_factura = objFacturaVenta.getNumFactura( Integer.parseInt(id_punto_emision) );
-        
-        
-        
-        Producto objProducto = new Producto(this._ip, this._puerto, this._db, this._usuario, this._clave);
-
-        Iva objIva = new Iva(this._ip, this._puerto, this._db, this._usuario, this._clave);
-        String codigoIva = objIva.getCodigoIva(pIva);
-        
-        FacturaElectronica objFE = new FacturaElectronica();
-
-        
-        descuento = (descuento.compareTo("") != 0) ? descuento : "0";
-        subtotal_0 = (subtotal_0.compareTo("") != 0) ? subtotal_0 : "0";
-        iva_2 = (iva_2.compareTo("") != 0) ? iva_2 : "0";
-        subtotal_2 = (Float.parseFloat(subtotal_2) > 0) ? subtotal_2 : (Float.parseFloat(iva_2) > 0 ? subtotal : "0");
-
-        iva_3 = (iva_3.compareTo("") != 0) ? iva_3 : "0";
-        subtotal_3 = (Float.parseFloat(subtotal_3) > 0) ? subtotal_3 : (Float.parseFloat(iva_3) > 0 ? subtotal : "0");
-
-        gastos_bancos = (gastos_bancos.compareTo("") != 0) ? gastos_bancos : "0";
-//        float ax_total = Float.parseFloat(total);
-
-
-        String ret_num_serie = "";
-        String ret_num_retencion = "0";
-        String ret_autorizacion = "";
-        String ret_fecha_emision = "";
-        String ret_impuesto_retenido = "0";
-        String ret_ejercicio_fiscal_mes = "";
-        String ret_ejercicio_fiscal = "NULL";
-
-        String paramRet = "";
-//        String codigos = "";
-//        String codsRetencion = "";
-//        String basesImponibles = "";
-//        String porcentajesRet = "";
-//        String valoresRet = "";
-//        String sustentos = "";
-
-        String matParamAsientoAx[][] = null;
-        matParamAsientoAx = Matriz.poner(matParamAsientoAx, new String[]{cxc, total, "0"});
-        if (Float.parseFloat(descuento) > 0) {
-            matParamAsientoAx = Matriz.poner(matParamAsientoAx, new String[]{desc_venta, descuento, "0"});
-        }
-
-        //  productos
-        String ids_productos = "";
-        String descripciones = "";
-        String cantidades_prod = "";
-        String preciosUnitarios = "";
-        String descuentos = "";
-        float sumDescuentos = 0;
-        String subtotales = "";
-        String ivas = "";
-        String pIvas = "";
-        String codigoIvas = "";
-        String paramArtic = "";
-//        for (int i = 0; i <= tope; i++) {
-//            if (request.getParameter("idPr" + i) != null) {
-//                String id_producto = request.getParameter("idPr" + i);
-                String subt = subtotal;
-                String iva = iva_2;
-                if( iva_2.compareTo("0") == 0 && iva_3.compareTo("0") != 0 ){
-                    iva = String.valueOf( Float.parseFloat(iva_3) );
-                }
-
-                ids_productos += id_producto + ",";
-                descripciones += descipcion + ",";
-                cantidades_prod += "1,";
-                if( subtotal_2.compareTo("0") != 0 && subtotal_3.compareTo("0") == 0 ){
-                    preciosUnitarios += subtotal_2 + ",";
-                }
-                if( subtotal_2.compareTo("0") == 0 && subtotal_3.compareTo("0") != 0 ){
-                    preciosUnitarios += subtotal_3 + ",";
-                }
-                
-                descuentos += "0,";
-//                sumDescuentos += Float.parseFloat(request.getParameter("d" + i));
-//                String pIva = request.getParameter("p_iva" + i);
-//                String codigoIva = request.getParameter("cod_iva" + i);
-                subtotales += subt + ",";
-                ivas += iva + ",";
-                pIvas += pIva + ",";
-                codigoIvas += codigoIva + ",";
-
-                String tipo = "";
-                String id_iva = "2";
-                String id_plan_cuenta_venta = "";
-                try {
-                    ResultSet rs = objProducto.getProducto(id_producto);
-                    if (rs.next()) {
-                        tipo = rs.getString("tipo") != null ? rs.getString("tipo") : "";
-                        id_iva = rs.getString("id_iva") != null ? rs.getString("id_iva") : "2";
-                        id_plan_cuenta_venta = rs.getString("id_plan_cuenta_venta") != null ? rs.getString("id_plan_cuenta_venta") : "";
-                        rs.close();
-                    }
-                } catch (Exception e) {
-                }
-
-                matParamAsientoAx = Matriz.poner(matParamAsientoAx, new String[]{id_plan_cuenta_venta, "0", subt});
-
-                String cuenta = tipo.compareTo("s") == 0 ? "id_plan_cuenta_venta_servicio" : "id_plan_cuenta_venta_bien";
-                String id_cuenta_iva = objIva.getIva(id_iva, cuenta);
-                matParamAsientoAx = Matriz.poner(matParamAsientoAx, new String[]{id_cuenta_iva, "0", iva});
-
-                paramArtic += "['" + id_producto + "', '1', '" + subt + "', '" + subt
-                        + "', '0', '" + iva + "', '" + total + "', '" + descipcion
-                        + "', '" + subt + "', '" + tipo + "', '" + pIva + "', '" + codigoIva + "', 'p','-1'],";
+//    public String facturarACredito(String _DOCS_ELECTRONICOS, String requestIP, String ipdocumental, int puertodocumental, String dbdocumental, String usuariodocumental, String clavedocumental,
+//            int id_sucursal, String id_punto_emision, String idInstalacion, String subtotal, String subtotal_0, String subtotal_2, String subtotal_3, String descuento, 
+//            String iva_2, String iva_3, String total, String descipcion)
+//    {
+//        
+//        String idFactura = "-1";
+//        String serie_factura = "";
+//        String autorizacion = "1111111111";
+//        String fecha_emision = Fecha.getFecha("ISO");
+//        String id_cliente = "";
+//        String ruc = "";
+//        String razon_social = "";
+//        String telefono = "";
+//        String direccion = "";
+//        String email = "";
+//        String forma_pago = "d";
+//        String id_forma_pago = "99";
+//        String banco = "";
+//        String num_cheque = "";
+//        String num_comp_pago = "";
+//        String gastos_bancos = "0";
+//        String id_plan_cuenta_banco = "0";
+//        String son = NumeroALetras.Convertir(total, false);
+//        String tipo_documento_cliente = "06";
+//        String id_plan_cuenta_anticipo = "232";
+//        String nombreBoucher = "";
+//        String idBanco = "0";
+//        String id_producto = "";
+//
+//        /*String bloqueo_libros = "";
+//        while(true){
+//            bloqueo_libros = conf.getValor("bloqueo_libros");
+//            if(bloqueo_libros.compareTo("false")==0) {
+//                conf.setValor("bloqueo_libros", "true");
+//                break;
 //            }
+//            try{
+//                Thread.sleep(500);
+//            }catch(InterruptedException e){
+//                e.printStackTrace();
+//            }
+//        }*/
+//        Configuracion conf = new Configuracion(this._ip, this._puerto, this._db, this._usuario, this._clave);
+//        
+//        Map<String, String> params = conf.getParametros("'clave_certificado', 'ambiente', 'ruc', 'razon_social', 'nombre_comercial', 'num_resolucion',"
+//                + " 'oblga_contabilidad', 'dir_matriz', 'desc_venta', 'cxc', 'p_iva1', 'email_info', 'numeros_soporte', 'pagina_web'");
+//        
+//        String clave_certificado = params.get("clave_certificado");
+//        String ambiente = params.get("ambiente");
+////        String tipoEmision = "1"; // 1=normal    2=Indisponibilidad del sistema
+//        String ruc_empresa = params.get("ruc");
+//        String razon_social_empresa = params.get("razon_social");
+//        String nombre_comercial = params.get("nombre_comercial");
+//        String email_info = params.get("email_info");
+//        String num_contacto = params.get("numeros_soporte");
+//        String sitio_web = params.get("pagina_web");
+//        String num_resolucion = params.get("num_resolucion");
+//        String oblga_contabilidad = params.get("oblga_contabilidad");
+//        String dir_matriz = params.get("dir_matriz");
+//        String desc_venta = params.get("desc_venta");
+//        String cxc = params.get("cxc");
+////        String cuenta_propina = params.get("propina");
+//        String pIva = params.get("p_iva1");
+//        
+//        String tipoEmision = "1";
+//        
+////        String clave_certificado = conf.getValor("clave_certificado");
+////        String ambiente = conf.getValor("ambiente");
+////        String tipoEmision = conf.getValor("tipo_emision"); // 1=normal    2=Indisponibilidad del sistema
+////        String cxc = conf.getValor("cxc");
+////        String ruc_empresa = conf.getValor("ruc");
+////        String razon_social_empresa = conf.getValor("razon_social");
+////        String nombre_comercial = conf.getValor("nombre_comercial");
+////        String num_resolucion = conf.getValor("num_resolucion");
+////        String oblga_contabilidad = conf.getValor("oblga_contabilidad");
+////        String dir_matriz = conf.getValor("dir_matriz");
+////        String desc_venta = conf.getValor("desc_venta");
+////        String pIva = conf.getValor("p_iva1");
+//        conf.cerrar();
+//
+//        Sucursal objSucursal = new Sucursal(this._ip, this._puerto, this._db, this._usuario, this._clave);
+//        String ubicacionNombreComercial[] = objSucursal.getDireccionDePuntoEmision(String.valueOf(id_punto_emision));
+//        String direccion_sucursal = ubicacionNombreComercial[0];
+//        nombre_comercial = ubicacionNombreComercial[1].compareTo("")!=0 ? ubicacionNombreComercial[1] : nombre_comercial;
+//        email_info = ubicacionNombreComercial[2].compareTo("")!=0 ? ubicacionNombreComercial[2] : email_info;
+//        num_contacto = ubicacionNombreComercial[3].compareTo("")!=0 ? ubicacionNombreComercial[3] : num_contacto;
+//        sitio_web = ubicacionNombreComercial[4].compareTo("")!=0 ? ubicacionNombreComercial[4] : sitio_web;
+//        objSucursal.cerrar();
+//        
+//        
+//        PuntoEmision objPuntoEmision = new PuntoEmision(this._ip, this._puerto, this._db, this._usuario, this._clave);
+//        serie_factura = "";
+//        try{
+//            ResultSet rsCliente = objPuntoEmision.getPuntoEmision(id_punto_emision);
+//            if(rsCliente.next()){
+//                serie_factura = rsCliente.getString("fac_num_serie")!=null ? rsCliente.getString("fac_num_serie") : "";
+//                rsCliente.close();
+//            }
+//        }catch(Exception e){
+//            e.printStackTrace();
+//        }finally{
+//            objPuntoEmision.cerrar();
 //        }
-        
-        
-        if (paramArtic.compareTo("") != 0) {
-            paramArtic = paramArtic.substring(0, paramArtic.length() - 1);
-
-            ids_productos = ids_productos.substring(0, ids_productos.length() - 1);
-            descripciones = descripciones.substring(0, descripciones.length() - 1);
-            cantidades_prod = cantidades_prod.substring(0, cantidades_prod.length() - 1);
-            preciosUnitarios = preciosUnitarios.substring(0, preciosUnitarios.length() - 1);
-            descuentos = descuentos.substring(0, descuentos.length() - 1);
-            subtotales = subtotales.substring(0, subtotales.length() - 1);
-            ivas = ivas.substring(0, ivas.length() - 1);
-            pIvas = pIvas.substring(0, pIvas.length() - 1);
-            codigoIvas = codigoIvas.substring(0, codigoIvas.length() - 1);
-        }
-        
-        String observacion = "Emisión de la factura por servicios de Internet Nro. "+serie_factura+"-" + num_factura;
-
-        String matParamAsiento[][] = Matriz.suprimirDuplicados(matParamAsientoAx, 0);
-        String paramAsiento = "";
-        for (int i = 0; i < matParamAsiento.length; i++) {
-            paramAsiento += "['" + matParamAsiento[i][0] + "', '" + matParamAsiento[i][1] + "', '" + matParamAsiento[i][2] + "'],";
-        }
-        if (paramAsiento.compareTo("") != 0) {
-            paramAsiento = paramAsiento.substring(0, paramAsiento.length() - 1);
-        }
-
-        //  POR ANTICIPOS
-        String idCliAnt = "";
-        String monto_vajar = "";
-
-
-
-
-        boolean ok = true;
-        String xmlFirmado = "";
-        String estadoDocumento = "";
-        String certificado = _DOCS_ELECTRONICOS + "certificado.p12";
-        String rutaSalida = _DOCS_ELECTRONICOS + "firmados";
-        String claveAcceso = "";
-        String autorizacionXml = "";
-        String respuestaAutoriz = "";
-        //String nombre_archivo = "factura_" + ruc + "_" + serie_factura + "-" + num_factura + ".xml";
-
-        
-
-        if (sumDescuentos == Float.parseFloat(descuento)) {
-
-            String prod_sin_stock = objFacturaVenta.verificarStock(id_sucursal, ids_productos, cantidades_prod);
-            prod_sin_stock = "";
-            if (prod_sin_stock.compareTo("") == 0) {
-
-                if (!objFacturaVenta.facturaDuplicada(serie_factura, String.valueOf(num_factura) ) ) {
-
-                    ok = false;
-                    String vecSerie[] = serie_factura.split("-");
-
-                    claveAcceso = objFE.getClaveAcceso(Cadena.setFecha(fecha_emision), "01", ruc_empresa, ambiente, vecSerie[0] + vecSerie[1], Cadena.setSecuencial( String.valueOf(num_factura) ), tipoEmision);
-
-                    objFE.generarXml(claveAcceso, ambiente, tipoEmision, razon_social_empresa, nombre_comercial, ruc_empresa, email_info, num_contacto, sitio_web, "01", vecSerie[0], vecSerie[1],
-                            Cadena.setSecuencial( String.valueOf(num_factura) ), dir_matriz, Cadena.setFecha(fecha_emision), direccion_sucursal, num_resolucion, oblga_contabilidad,
-                            tipo_documento_cliente, razon_social, ruc, subtotal, descuento, subtotal_0, subtotal_2, iva_2, subtotal_3, iva_3, total, codigoFormaPago,
-                            ids_productos, descripciones, cantidades_prod, preciosUnitarios, descuentos, subtotales, ivas, pIvas, codigoIvas, direccion, email);
-                    String documentoXml = _DOCS_ELECTRONICOS + "generados/" + claveAcceso + ".xml";
-                    objFE.salvar(documentoXml);
-                    String error = objFE.getError();
-
-                    if (error.compareTo("") == 0) {
-                        estadoDocumento = "g";
-                        String archivoSalida = claveAcceso + ".xml";
-                        FirmaXadesBes firmaDigital = new FirmaXadesBes(certificado, clave_certificado, documentoXml, rutaSalida, archivoSalida);
-                        firmaDigital.execute();
-                        error = firmaDigital.getError();
-
-                        if (error.compareTo("") == 0) {
-                            estadoDocumento = "f";
-                            try{
-                                autorizacionXml = this.getStringFromFile(_DOCS_ELECTRONICOS + "firmados/" + claveAcceso + ".xml");
-                                ok = true;
-                            } catch( Exception e){
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-//                    r = "fun»_('btnVenEn').disabled=false;^msg»" + error;
-                    this.setError(error);
-
-                    if (ok) {
-                        idFactura = this.insertar( id_sucursal, Integer.parseInt(id_punto_emision), id_cliente, this._usuario, serie_factura, String.valueOf(num_factura), autorizacion, ruc,
-                                razon_social, fecha_emision, direccion, telefono, id_forma_pago, forma_pago, banco, num_cheque, num_comp_pago, gastos_bancos, id_plan_cuenta_banco,
-                                son, observacion, subtotal, subtotal_0, subtotal_2, subtotal_3, descuento, iva_2, iva_3, total, "array[" + paramArtic + "]", ret_num_serie, ret_num_retencion,
-                                ret_autorizacion, ret_fecha_emision, ret_ejercicio_fiscal_mes, ret_ejercicio_fiscal, ret_impuesto_retenido,
-                                "array[" + paramRet + "]::varchar[]", "array[" + paramAsiento + "]", xmlFirmado, id_plan_cuenta_anticipo, idCliAnt, monto_vajar, nombreBoucher);
-                        if (idFactura.compareTo("-1") != 0) {
-                            //String vecFactComp[] = id_factura_.split(":");
-                            //String id_factura = vecFactComp[0];
-                            /*if(respuestaAutoriz.equals("RECHAZADO") || respuestaAutoriz.equals("NO AUTORIZADO")){
-                                objFacturaVenta.anular(id_factura);
-                            }*/
-                            objFacturaVenta.setDocumentoElectronico(idFactura, estadoDocumento, claveAcceso, autorizacionXml, respuestaAutoriz, idBanco);
-
-                            Archivo archivo = new Archivo(ipdocumental, puertodocumental, dbdocumental, usuariodocumental, clavedocumental);
-                            archivo.setArchivoDocumentalTexto(autorizacionXml, String.valueOf(num_factura), "" + id_sucursal, "tbl_factura_venta", idFactura, "documentoxml", "public", "db_isp");
-                            archivo.cerrar();
-
-
-//                                        if(factIpTv.compareTo("si")==0 && idInstalacion.compareTo("undefined") != 0){
-//                                            Instalacion objInstalacion = new Instalacion(this._ip, this._puerto, this._db, usuario, clave);
-//                                            objInstalacion.setSuscripcionTVGOMAX(idInstalacion);
-//                                            objInstalacion.cerrar();
-//                                        }
-
-
-                            Auditoria auditoria = new Auditoria(this._ip, this._puerto, this._db, this._usuario, this._clave);
-                            auditoria.setRegistro(this._usuario, requestIP, "EMISION DE LA FACTURA DE VENTA: " + serie_factura + "-" + num_factura);
-                            auditoria.cerrar();
-
-                            return idFactura;
-
-//                                r = "err»0^vta»cmp^fun»fac_buscarVenta();imprimir('pdfFacturaVenta?id=" + id_factura_ + "');";
-
-                        } else {
-                            this.setError(objFacturaVenta.getError() );
-                        }
-                        
-                    }
-
-                } else {
-//                        r = "fun»_('btnVenEn').disabled=false;^msg»El número de factura " + serie_factura + "-" + num_factura + " ya ha sido emitido.";
-                    this.setError("El número de factura " + serie_factura + "-" + num_factura + " ya ha sido emitido.");
-                }
-
-            } else {
-//                r = "fun»_('btnVenEn').disabled=false;^msg»Stock insuficiente. El stock del producto de código: " + prod_sin_stock + " ha disminuido por una venta realizada desde otra caja ubicada en la sucursal.";
-                this.setError("Stock insuficiente. El stock del producto de código: " + prod_sin_stock + " ha disminuido por una venta realizada desde otra caja ubicada en la sucursal.");
-            }
-            
-        } else {
-//            r = "fun»_('btnVenEn').disabled=false;^msg»La sumatoria de descuentos del detalle " + sumDescuentos + " es diferente del descuento en el resumen " + descuento;
-            this.setError("La sumatoria de descuentos del detalle " + sumDescuentos + " es diferente del descuento en el resumen " + descuento);
-        }
-        
-        objProducto.cerrar();
-        objIva.cerrar();
-
-        return "-1";
-    }
-    
+//        
+//        
+//        Instalacion objInstalacion = new Instalacion(this._ip, this._puerto, this._db, this._usuario, this._clave);
+//        try {
+//            ResultSet rsInstalacion = objInstalacion.getInstalacion(idInstalacion);
+//            if (rsInstalacion.next()) {
+//                id_cliente = (rsInstalacion.getString("id_cliente") != null) ? rsInstalacion.getString("id_cliente") : "-1";
+//                ruc = (rsInstalacion.getString("ruc") != null) ? rsInstalacion.getString("ruc") : "";
+//                razon_social = (rsInstalacion.getString("razon_social") != null) ? rsInstalacion.getString("razon_social") : "";
+//                direccion = (rsInstalacion.getString("direccion") != null) ? rsInstalacion.getString("direccion") : "";
+//                telefono = (rsInstalacion.getString("telefono") != null) ? rsInstalacion.getString("telefono") : "";
+//                email = (rsInstalacion.getString("email") != null) ? rsInstalacion.getString("email") : "";
+//                tipo_documento_cliente = rsInstalacion.getString("tipo_documento") != null ? rsInstalacion.getString("tipo_documento") : "06";
+//                id_plan_cuenta_anticipo = rsInstalacion.getString("id_plan_cuenta_anticipo") != null ? rsInstalacion.getString("id_plan_cuenta_anticipo") : "232";
+//                id_producto = (rsInstalacion.getString("id_producto") != null) ? rsInstalacion.getString("id_producto") : "";
+//                rsInstalacion.close();
+//            }
+//        }catch(Exception e){
+//            e.printStackTrace();
+//        }finally{
+//            objInstalacion.cerrar();
+//        }
+//        
+//        
+//        FormaPago objFormaPago = new FormaPago(this._ip, this._puerto, this._db, this._usuario, this._clave);
+//        String codigoFormaPago = objFormaPago.getCodigoFormaPago(id_forma_pago);
+//        objFormaPago.cerrar();
+//        
+//        
+//
+//        FacturaVenta objFacturaVenta = new FacturaVenta(this._ip, this._puerto, this._db, this._usuario, this._clave);
+//        long num_factura = objFacturaVenta.getNumFactura( Integer.parseInt(id_punto_emision) );
+//        
+//        
+//        
+//        Producto objProducto = new Producto(this._ip, this._puerto, this._db, this._usuario, this._clave);
+//
+//        Iva objIva = new Iva(this._ip, this._puerto, this._db, this._usuario, this._clave);
+//        String codigoIva = objIva.getCodigoIva(pIva);
+//        
+//        FacturaElectronica objFE = new FacturaElectronica();
+//
+//        
+//        descuento = (descuento.compareTo("") != 0) ? descuento : "0";
+//        subtotal_0 = (subtotal_0.compareTo("") != 0) ? subtotal_0 : "0";
+//        iva_2 = (iva_2.compareTo("") != 0) ? iva_2 : "0";
+//        subtotal_2 = (Float.parseFloat(subtotal_2) > 0) ? subtotal_2 : (Float.parseFloat(iva_2) > 0 ? subtotal : "0");
+//
+//        iva_3 = (iva_3.compareTo("") != 0) ? iva_3 : "0";
+//        subtotal_3 = (Float.parseFloat(subtotal_3) > 0) ? subtotal_3 : (Float.parseFloat(iva_3) > 0 ? subtotal : "0");
+//
+//        gastos_bancos = (gastos_bancos.compareTo("") != 0) ? gastos_bancos : "0";
+////        float ax_total = Float.parseFloat(total);
+//
+//
+//        String ret_num_serie = "";
+//        String ret_num_retencion = "0";
+//        String ret_autorizacion = "";
+//        String ret_fecha_emision = "";
+//        String ret_impuesto_retenido = "0";
+//        String ret_ejercicio_fiscal_mes = "";
+//        String ret_ejercicio_fiscal = "NULL";
+//
+//        String paramRet = "";
+////        String codigos = "";
+////        String codsRetencion = "";
+////        String basesImponibles = "";
+////        String porcentajesRet = "";
+////        String valoresRet = "";
+////        String sustentos = "";
+//
+//        String matParamAsientoAx[][] = null;
+//        matParamAsientoAx = Matriz.poner(matParamAsientoAx, new String[]{cxc, total, "0"});
+//        if (Float.parseFloat(descuento) > 0) {
+//            matParamAsientoAx = Matriz.poner(matParamAsientoAx, new String[]{desc_venta, descuento, "0"});
+//        }
+//
+//        //  productos
+//        String ids_productos = "";
+//        String descripciones = "";
+//        String cantidades_prod = "";
+//        String preciosUnitarios = "";
+//        String descuentos = "";
+//        float sumDescuentos = 0;
+//        String subtotales = "";
+//        String ivas = "";
+//        String pIvas = "";
+//        String codigoIvas = "";
+//        String paramArtic = "";
+////        for (int i = 0; i <= tope; i++) {
+////            if (request.getParameter("idPr" + i) != null) {
+////                String id_producto = request.getParameter("idPr" + i);
+//                String subt = subtotal;
+//                String iva = iva_2;
+//                if( iva_2.compareTo("0") == 0 && iva_3.compareTo("0") != 0 ){
+//                    iva = String.valueOf( Float.parseFloat(iva_3) );
+//                }
+//
+//                ids_productos += id_producto + ",";
+//                descripciones += descipcion + ",";
+//                cantidades_prod += "1,";
+//                if( subtotal_2.compareTo("0") != 0 && subtotal_3.compareTo("0") == 0 ){
+//                    preciosUnitarios += subtotal_2 + ",";
+//                }
+//                if( subtotal_2.compareTo("0") == 0 && subtotal_3.compareTo("0") != 0 ){
+//                    preciosUnitarios += subtotal_3 + ",";
+//                }
+//                
+//                descuentos += "0,";
+////                sumDescuentos += Float.parseFloat(request.getParameter("d" + i));
+////                String pIva = request.getParameter("p_iva" + i);
+////                String codigoIva = request.getParameter("cod_iva" + i);
+//                subtotales += subt + ",";
+//                ivas += iva + ",";
+//                pIvas += pIva + ",";
+//                codigoIvas += codigoIva + ",";
+//
+//                String tipo = "";
+//                String id_iva = "2";
+//                String id_plan_cuenta_venta = "";
+//                try {
+//                    ResultSet rs = objProducto.getProducto(id_producto);
+//                    if (rs.next()) {
+//                        tipo = rs.getString("tipo") != null ? rs.getString("tipo") : "";
+//                        id_iva = rs.getString("id_iva") != null ? rs.getString("id_iva") : "2";
+//                        id_plan_cuenta_venta = rs.getString("id_plan_cuenta_venta") != null ? rs.getString("id_plan_cuenta_venta") : "";
+//                        rs.close();
+//                    }
+//                } catch (Exception e) {
+//                }
+//
+//                matParamAsientoAx = Matriz.poner(matParamAsientoAx, new String[]{id_plan_cuenta_venta, "0", subt});
+//
+//                String cuenta = tipo.compareTo("s") == 0 ? "id_plan_cuenta_venta_servicio" : "id_plan_cuenta_venta_bien";
+//                String id_cuenta_iva = objIva.getIva(id_iva, cuenta);
+//                matParamAsientoAx = Matriz.poner(matParamAsientoAx, new String[]{id_cuenta_iva, "0", iva});
+//
+//                paramArtic += "['" + id_producto + "', '1', '" + subt + "', '" + subt
+//                        + "', '0', '" + iva + "', '" + total + "', '" + descipcion
+//                        + "', '" + subt + "', '" + tipo + "', '" + pIva + "', '" + codigoIva + "', 'p','-1'],";
+////            }
+////        }
+//        
+//        
+//        if (paramArtic.compareTo("") != 0) {
+//            paramArtic = paramArtic.substring(0, paramArtic.length() - 1);
+//
+//            ids_productos = ids_productos.substring(0, ids_productos.length() - 1);
+//            descripciones = descripciones.substring(0, descripciones.length() - 1);
+//            cantidades_prod = cantidades_prod.substring(0, cantidades_prod.length() - 1);
+//            preciosUnitarios = preciosUnitarios.substring(0, preciosUnitarios.length() - 1);
+//            descuentos = descuentos.substring(0, descuentos.length() - 1);
+//            subtotales = subtotales.substring(0, subtotales.length() - 1);
+//            ivas = ivas.substring(0, ivas.length() - 1);
+//            pIvas = pIvas.substring(0, pIvas.length() - 1);
+//            codigoIvas = codigoIvas.substring(0, codigoIvas.length() - 1);
+//        }
+//        
+//        String observacion = "Emisión de la factura por servicios de Internet Nro. "+serie_factura+"-" + num_factura;
+//
+//        String matParamAsiento[][] = Matriz.suprimirDuplicados(matParamAsientoAx, 0);
+//        String paramAsiento = "";
+//        for (int i = 0; i < matParamAsiento.length; i++) {
+//            paramAsiento += "['" + matParamAsiento[i][0] + "', '" + matParamAsiento[i][1] + "', '" + matParamAsiento[i][2] + "'],";
+//        }
+//        if (paramAsiento.compareTo("") != 0) {
+//            paramAsiento = paramAsiento.substring(0, paramAsiento.length() - 1);
+//        }
+//
+//        //  POR ANTICIPOS
+//        String idCliAnt = "";
+//        String monto_vajar = "";
+//
+//
+//
+//
+//        boolean ok = true;
+//        String xmlFirmado = "";
+//        String estadoDocumento = "";
+//        String certificado = _DOCS_ELECTRONICOS + "certificado.p12";
+//        String rutaSalida = _DOCS_ELECTRONICOS + "firmados";
+//        String claveAcceso = "";
+//        String autorizacionXml = "";
+//        String respuestaAutoriz = "";
+//        //String nombre_archivo = "factura_" + ruc + "_" + serie_factura + "-" + num_factura + ".xml";
+//
+//        
+//
+//        if (sumDescuentos == Float.parseFloat(descuento)) {
+//
+//            String prod_sin_stock = objFacturaVenta.verificarStock(id_sucursal, ids_productos, cantidades_prod);
+//            prod_sin_stock = "";
+//            if (prod_sin_stock.compareTo("") == 0) {
+//
+//                if (!objFacturaVenta.facturaDuplicada(serie_factura, String.valueOf(num_factura) ) ) {
+//
+//                    ok = false;
+//                    String vecSerie[] = serie_factura.split("-");
+//
+//                    claveAcceso = objFE.getClaveAcceso(Cadena.setFecha(fecha_emision), "01", ruc_empresa, ambiente, vecSerie[0] + vecSerie[1], Cadena.setSecuencial( String.valueOf(num_factura) ), tipoEmision);
+//
+//                    objFE.generarXml(claveAcceso, ambiente, tipoEmision, razon_social_empresa, nombre_comercial, ruc_empresa, email_info, num_contacto, sitio_web, "01", vecSerie[0], vecSerie[1],
+//                            Cadena.setSecuencial( String.valueOf(num_factura) ), dir_matriz, Cadena.setFecha(fecha_emision), direccion_sucursal, num_resolucion, oblga_contabilidad,
+//                            tipo_documento_cliente, razon_social, ruc, subtotal, descuento, subtotal_0, subtotal_2, iva_2, subtotal_3, iva_3, total, codigoFormaPago,
+//                            ids_productos, descripciones, cantidades_prod, preciosUnitarios, descuentos, subtotales, ivas, pIvas, codigoIvas, direccion, email);
+//                    String documentoXml = _DOCS_ELECTRONICOS + "generados/" + claveAcceso + ".xml";
+//                    objFE.salvar(documentoXml);
+//                    String error = objFE.getError();
+//
+//                    if (error.compareTo("") == 0) {
+//                        estadoDocumento = "g";
+//                        String archivoSalida = claveAcceso + ".xml";
+//                        FirmaXadesBes firmaDigital = new FirmaXadesBes(certificado, clave_certificado, documentoXml, rutaSalida, archivoSalida);
+//                        firmaDigital.execute();
+//                        error = firmaDigital.getError();
+//
+//                        if (error.compareTo("") == 0) {
+//                            estadoDocumento = "f";
+//                            try{
+//                                autorizacionXml = this.getStringFromFile(_DOCS_ELECTRONICOS + "firmados/" + claveAcceso + ".xml");
+//                                ok = true;
+//                            } catch( Exception e){
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                    }
+////                    r = "fun»_('btnVenEn').disabled=false;^msg»" + error;
+//                    this.setError(error);
+//
+//                    if (ok) {
+//                        idFactura = this.insertar( id_sucursal, Integer.parseInt(id_punto_emision), id_cliente, this._usuario, serie_factura, String.valueOf(num_factura), autorizacion, ruc,
+//                                razon_social, fecha_emision, direccion, telefono, id_forma_pago, forma_pago, banco, num_cheque, num_comp_pago, gastos_bancos, id_plan_cuenta_banco,
+//                                son, observacion, subtotal, subtotal_0, subtotal_2, subtotal_3, descuento, iva_2, iva_3, total, "array[" + paramArtic + "]", ret_num_serie, ret_num_retencion,
+//                                ret_autorizacion, ret_fecha_emision, ret_ejercicio_fiscal_mes, ret_ejercicio_fiscal, ret_impuesto_retenido,
+//                                "array[" + paramRet + "]::varchar[]", "array[" + paramAsiento + "]", xmlFirmado, id_plan_cuenta_anticipo, idCliAnt, monto_vajar, nombreBoucher);
+//                        if (idFactura.compareTo("-1") != 0) {
+//                            //String vecFactComp[] = id_factura_.split(":");
+//                            //String id_factura = vecFactComp[0];
+//                            /*if(respuestaAutoriz.equals("RECHAZADO") || respuestaAutoriz.equals("NO AUTORIZADO")){
+//                                objFacturaVenta.anular(id_factura);
+//                            }*/
+//                            objFacturaVenta.setDocumentoElectronico(idFactura, estadoDocumento, claveAcceso, autorizacionXml, respuestaAutoriz, idBanco);
+//
+//                            Archivo archivo = new Archivo(ipdocumental, puertodocumental, dbdocumental, usuariodocumental, clavedocumental);
+//                            archivo.setArchivoDocumentalTexto(autorizacionXml, String.valueOf(num_factura), "" + id_sucursal, "tbl_factura_venta", idFactura, "documentoxml", "public", "db_isp");
+//                            archivo.cerrar();
+//
+//
+////                                        if(factIpTv.compareTo("si")==0 && idInstalacion.compareTo("undefined") != 0){
+////                                            Instalacion objInstalacion = new Instalacion(this._ip, this._puerto, this._db, usuario, clave);
+////                                            objInstalacion.setSuscripcionTVGOMAX(idInstalacion);
+////                                            objInstalacion.cerrar();
+////                                        }
+//
+//
+//                            Auditoria auditoria = new Auditoria(this._ip, this._puerto, this._db, this._usuario, this._clave);
+//                            auditoria.setRegistro(this._usuario, requestIP, "EMISION DE LA FACTURA DE VENTA: " + serie_factura + "-" + num_factura);
+//                            auditoria.cerrar();
+//
+//                            return idFactura;
+//
+////                                r = "err»0^vta»cmp^fun»fac_buscarVenta();imprimir('pdfFacturaVenta?id=" + id_factura_ + "');";
+//
+//                        } else {
+//                            this.setError(objFacturaVenta.getError() );
+//                        }
+//                        
+//                    }
+//
+//                } else {
+////                        r = "fun»_('btnVenEn').disabled=false;^msg»El número de factura " + serie_factura + "-" + num_factura + " ya ha sido emitido.";
+//                    this.setError("El número de factura " + serie_factura + "-" + num_factura + " ya ha sido emitido.");
+//                }
+//
+//            } else {
+////                r = "fun»_('btnVenEn').disabled=false;^msg»Stock insuficiente. El stock del producto de código: " + prod_sin_stock + " ha disminuido por una venta realizada desde otra caja ubicada en la sucursal.";
+//                this.setError("Stock insuficiente. El stock del producto de código: " + prod_sin_stock + " ha disminuido por una venta realizada desde otra caja ubicada en la sucursal.");
+//            }
+//            
+//        } else {
+////            r = "fun»_('btnVenEn').disabled=false;^msg»La sumatoria de descuentos del detalle " + sumDescuentos + " es diferente del descuento en el resumen " + descuento;
+//            this.setError("La sumatoria de descuentos del detalle " + sumDescuentos + " es diferente del descuento en el resumen " + descuento);
+//        }
+//        
+//        objProducto.cerrar();
+//        objIva.cerrar();
+//
+//        return "-1";
+//    }
+//    
 }

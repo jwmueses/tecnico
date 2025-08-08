@@ -1135,6 +1135,10 @@ public class Instalacion extends DataBase {
                     sql.add("insert into tbl_prefactura_dias_conexion(id_instalacion, periodo, num_dias) values(" + id_instalacion + ", (select date_trunc('month', ('" + fecha_instalacion + "'::date + '2 month'::interval)::date )::date), " + numDias + ");");
                 }
             }
+            sql.add("update tbl_instalacion_promocion_detalle set inst_periodo_inicia = '"+fecha_instalacion+"', " +
+                "pref_periodo_inicia = (case when pref_p_descuento > 0 then '"+fecha_instalacion+"'::date else null end) " +
+                "where id_instalacion_promocion_detalle = (select id_instalacion_promocion_detalle " +
+                "from tbl_instalacion as I inner join tbl_instalacion_promocion_detalle as PD on I.id_instalacion = PD.id_instalacion where I.id_instalacion = " + id_instalacion + ")");
         } catch (Exception e) {
             System.out.println("error al producir formateo de ruta");
         }

@@ -11,21 +11,21 @@ package ec.saitel.api.util;
  */
 public class Parametro 
 {
-    private static String _ip = "192.168.217.16";      //  127.0.0.1     pruebas = 192.168.217.16     produccion = 192.168.217.21
+    private static String _ip = "127.0.0.1";      //  127.0.0.1     pruebas = 192.168.217.16     produccion = 192.168.217.21
     private static int _puerto = 5432;
     private static String _db = "db_isp";
     private static String _usuario = "postgres";
-    private static String _clave = "Gi%9875.-*5+$)(";    //  Gi%9875.-*5+$)      pruebas = A0Lpni2++
+    private static String _clave = "Gi%9875.-*5+$)";    //  Gi%9875.-*5+$)      pruebas = A0Lpni2++
     
-    private static String docIp = "192.168.217.16";      //  127.0.0.1     pruebas = 192.168.217.16    produccion = 192.168.217.31
+    private static String docIp = "192.168.217.31";      //  127.0.0.1     pruebas = 192.168.217.16    produccion = 192.168.217.31
     private static int docPpuerto = 5432;
     private static String docDb = "db_isp_documentos";
     private static String docUsuario = "postgres";
-    private static String docClave = "Gi%9875.-*5+$)(";    //  Gi%9875.-*5+$)      pruebas = A0Lpni2++
+    private static String docClave = "Gi%9875.-*5+$)";    //  Gi%9875.-*5+$)      pruebas = A0Lpni2++
     
     private static String _docsElectronicos = "/opt/lampp/htdocs/anexos/fe/";
     private static String _dir = "/opt/lampp/htdocs/anexos/dir/";
-    private static String _urlAnexos = "http://138.185.137.120/anexos/";
+    private static String _urlAnexos = "https://138.185.137.120/anexos/";
 
     public static String getIp() {
         return _ip;
