@@ -11,7 +11,7 @@ package ec.saitel.api.util;
  */
 public class Parametro 
 {
-    private static String _ip = "127.0.0.1";      //  127.0.0.1     pruebas = 192.168.217.16     produccion = 192.168.217.21
+    private static String _ip = "192.168.217.21";      //  127.0.0.1     pruebas = 192.168.217.16     produccion = 192.168.217.21
     private static int _puerto = 5432;
     private static String _db = "db_isp";
     private static String _usuario = "postgres";
