@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -2753,20 +2754,57 @@ public class Instalacion extends DataBase {
         return false;
     }
     
+    public int numCertificadosCambioDomicilioEnAnio(String idInstalacion, String idCertificadosIsp) 
+    {
+        int num=0;
+        //  se verifica que en cambios de domicilio el primer año no tiene el beneficio gratis
+        String fechaInstalacion = this.getFechaInstalacion(idInstalacion);
+        String fechaInstalacionFin = Fecha.add( fechaInstalacion, Calendar.YEAR, 1 );
+
+        long timestampFechaInstalacion = Fecha.getTimeStamp( fechaInstalacion );
+        long timestampFechaActual = Fecha.getTimeStamp( Fecha.getFecha("ISO") );   
+        long timestampFechaInstalacionFin = Fecha.getTimeStamp( fechaInstalacionFin );
+
+        if( timestampFechaInstalacion <= timestampFechaActual && timestampFechaActual <= timestampFechaInstalacionFin 
+                    && (idCertificadosIsp.indexOf("2")>=0 || idCertificadosIsp.indexOf("3")>=0) ){
+            return 2;
+        }
+        
+        try {
+            ResultSet res = this.consulta("with I as(\n" +
+                    " 	select id_instalacion, ( date_part('year', now()) || '-'  || date_part('month', fecha_instalacion) || '-' || date_part('day', fecha_instalacion) )::date as fecha_instalacion \n" +
+                    "	from tbl_instalacion where id_instalacion = "+idInstalacion+
+                    ") \n" +
+                    ",I1 as ( \n" +
+                    "	select I.id_instalacion, case when I.fecha_instalacion>=now()::date then (I.fecha_instalacion - '1 year'::interval)::date else I.fecha_instalacion end as fecha_desde_instalacion \n" +
+                    "	from I \n" +
+                    ") \n" +
+                    "select count(C.id_instalacion) from tbl_instalacion_certificado as C inner join I1 on C.id_instalacion =I1.id_instalacion \n" +
+                    "where not C.eliminado and C.id_instalacion = "+idInstalacion+" and C.id_certificados_isp in("+idCertificadosIsp+") and C.fecha_creada between I1.fecha_desde_instalacion and (I1.fecha_desde_instalacion + '1 year'::interval)::date;");
+            if ( res.next() ) {
+                num = res.getString(1)!=null ? res.getInt(1) : 0;
+                res.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return num;
+    }
+    
     public int numCertificadosEnAnio(String id_instalacion, String id_certificados_isp) 
     {
         int num=0;
         try {
             ResultSet res = this.consulta("with I as(\n" +
-                "	select id_instalacion, ( '2024-' || date_part('month', fecha_instalacion) || '-' || date_part('day', fecha_instalacion) )::date as fecha_instalacion \n" +
-                "	from tbl_instalacion where id_instalacion = " + id_instalacion + 
-                "), \n" +
-                "I1 as ( \n" +
-                "	select I.id_instalacion, case when I.fecha_instalacion>=now()::date then (I.fecha_instalacion - '1 year'::interval)::date else I.fecha_instalacion end as fecha_instalacion \n" +
-                "	from I \n" +
-                ") \n" +
-                "select count(C.id_instalacion) from tbl_instalacion_certificado as C inner join I1 on C.id_instalacion =I1.id_instalacion \n" +
-                "where not C.eliminado and C.id_instalacion = " + id_instalacion + " and C.id_certificados_isp in(" + id_certificados_isp + ") and I1.fecha_instalacion <= now()::date;");
+                    " 	select id_instalacion, ( date_part('year', now()) || '-'  || date_part('month', fecha_instalacion) || '-' || date_part('day', fecha_instalacion) )::date as fecha_instalacion \n" +
+                    "	from tbl_instalacion where id_instalacion = "+id_instalacion+
+                    ") \n" +
+                    ",I1 as ( \n" +
+                    "	select I.id_instalacion, case when I.fecha_instalacion>=now()::date then (I.fecha_instalacion - '1 year'::interval)::date else I.fecha_instalacion end as fecha_desde_instalacion \n" +
+                    "	from I \n" +
+                    ") \n" +
+                    "select count(C.id_instalacion) from tbl_instalacion_certificado as C inner join I1 on C.id_instalacion =I1.id_instalacion \n" +
+                    "where not C.eliminado and C.id_instalacion = "+id_instalacion+" and C.id_certificados_isp in("+id_certificados_isp+") and C.fecha_creada between I1.fecha_desde_instalacion and (I1.fecha_desde_instalacion + '1 year'::interval)::date;");
             if ( res.next() ) {
                 num = res.getString(1)!=null ? res.getInt(1) : 0;
                 res.close();
@@ -2873,6 +2911,21 @@ public class Instalacion extends DataBase {
         return this.consulta("select i.id_instalacion,(i.ip||' '||i.txt_estado_servicio)as instalacion from vta_instalacion as i where i.id_cliente='" + id_cliente + "';");
     }
 
+    public String getFechaInstalacion(String id)
+    {
+        String fechaInstalacion = Fecha.getFecha("ISO");
+        try{
+            ResultSet rs = this.consulta("SELECT fecha_instalacion FROM tbl_instalacion where id_instalacion=" + id);
+            if(rs.next()){
+                fechaInstalacion = rs.getString("fecha_instalacion")!=null ? rs.getString("fecha_instalacion") : fechaInstalacion;
+                rs.close();
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return fechaInstalacion;
+    }
+    
     public boolean GetCumplioPromocionInstalacion(String id_instalacion) {
         ResultSet res = this.consulta("select  case when tiempo_trascurridotmp>=men_tiempo_de_permanencia_min then 'si' else 'no' end as tiempo_cumplido from vta_instalacion_promocion_contrato where id_instalacion='" + id_instalacion + "';");
         try {

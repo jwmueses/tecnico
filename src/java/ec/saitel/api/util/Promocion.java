@@ -217,4 +217,41 @@ public class Promocion extends DataBase {
                 + " inner join tbl_sector as s on s.id_sucursal = ps.id_sucursal  "
                 + " where ps.id_sucursal ='" + id_sucursal + "' and s.id_sector ='" + id_sector + "' and pp.id_plan_servicio ='" + id_plan_servicio + "' and p.id_promocion ='" + id_promocion + "';");
     }
+    
+//    public boolean cobrarCambioDomicilio(String idInstalacion)
+//    {
+//        try {
+//            ResultSet rs = this.consulta("select I.id_instalacion, I.ip, I.fecha_instalacion, ( I.fecha_instalacion + (P.men_tiempo_de_permanencia_min || ' month')::interval)::date,  P.promocion, P.migracion_fibra, P.cambio_domicilio, P.men_tiempo_de_permanencia_min, C.fecha_creada \n" +
+//                "	, case when P.cambio_domicilio and C.fecha_creada between I.fecha_instalacion and (I.fecha_instalacion + (P.men_tiempo_de_permanencia_min || ' month')::interval)::date then true else false end as cobrar_cambio_domicilio \n" +
+//                "from tbl_promocion P inner join tbl_instalacion_promocion IP on P.id_promocion = IP.id_promocion \n" +
+//                "	inner join tbl_instalacion I on IP.id_instalacion = I.id_instalacion \n" +
+//                "	inner join tbl_instalacion_certificado C on I.id_instalacion = C.id_instalacion \n" +
+//                "where C.id_certificados_isp in(2,3) and not C.eliminado and I.id_instalacion = " + idInstalacion);
+//            if(rs.next()){
+//                return rs.getString("cobrar_cambio_domicilio") != null ? rs.getBoolean("cobrar_cambio_domicilio") : true;
+//            }
+//        } catch( Exception e) {
+//            e.printStackTrace();
+//        }
+//        return true;
+//    }
+//    
+//    public boolean cobrarMigracion(String idInstalacion)
+//    {
+//        try {
+//            ResultSet rs = this.consulta("select I.id_instalacion, I.ip, I.fecha_instalacion, ( I.fecha_instalacion + (P.men_tiempo_de_permanencia_min || ' month')::interval)::date,  P.promocion, P.migracion_fibra, P.cambio_domicilio, P.men_tiempo_de_permanencia_min, C.fecha_creada \n" +
+//                "	, case when P.migracion_fibra and C.fecha_creada between I.fecha_instalacion and (I.fecha_instalacion + (P.men_tiempo_de_permanencia_min || ' month')::interval)::date then true else false end as cobrar_migracion \n" +
+//                "from tbl_promocion P inner join tbl_instalacion_promocion IP on P.id_promocion = IP.id_promocion \n" +
+//                "	inner join tbl_instalacion I on IP.id_instalacion = I.id_instalacion \n" +
+//                "	inner join tbl_instalacion_certificado C on I.id_instalacion = C.id_instalacion \n" +
+//                "where C.id_certificados_isp in(4,5,6) and not C.eliminado and I.id_instalacion = " + idInstalacion);
+//            if(rs.next()){
+//                return rs.getString("cobrar_migracion") != null ? rs.getBoolean("cobrar_migracion") : true;
+//            }
+//        } catch( Exception e) {
+//            e.printStackTrace();
+//        }
+//        return true;
+//    }
+    
 }

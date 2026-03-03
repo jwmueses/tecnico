@@ -31,6 +31,7 @@ import ec.saitel.api.util.Parametro;
 import ec.saitel.api.util.PdfDocumental;
 import ec.saitel.api.util.PreFactura;
 import ec.saitel.api.util.Producto;
+import ec.saitel.api.util.Promocion;
 import ec.saitel.api.util.Sucursal;
 import ec.saitel.api.util.Utiles;
 import ec.saitel.api.util.firma.CordenadasXY;
@@ -52,8 +53,7 @@ public class OrdenTrabajoDao
     public String guardar(OrdenTrabajoModel ordenTrabajo)
     {
         
-        String r = "Ha ocurrido un error inesperado, por favor, vuelva a intentarlo más tarde o "
-                    + "contáctese con el administrador del sistema para mayor información.";
+        String r = "Ha ocurrido un error inesperado, por favor, vuelva a intentarlo más tarde o contáctese con el administrador del sistema para mayor información.";
 
         try {
             
@@ -71,7 +71,7 @@ public class OrdenTrabajoDao
              String empresa = conf.getValor("razon_social");
              conf.cerrar();*/
             String observacion = "";
-            Archivo archivo = new Archivo( Parametro.getDocIp(), Parametro.getDocPpuerto(), Parametro.getDocDb(), Parametro.getDocUsuario(), Parametro.getDocClave() );
+            String auxR = "";
             Documento objDocumento = new Documento( Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave() );
             try {
                 ResultSet rsDoc = objDocumento.getDocumento("p");
@@ -80,534 +80,553 @@ public class OrdenTrabajoDao
                     rsDoc.close();
                 }
             } catch (Exception e) {
+                auxR = e.getMessage();
                 e.printStackTrace();
             } finally {
                 objDocumento.cerrar();
             }
 
-            Activo objActivo = new Activo(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-            long num_documento = objActivo.getNunDocumento();
-
-            Bodega objBodega = new Bodega(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-
-            Auditoria auditoria = new Auditoria(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-
-            Instalacion objInstalacion = new Instalacion(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-
-            Producto objProducto = new Producto(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-
-            PreFactura objPrefactura = new PreFactura(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-            OrdenTrabajo objOrdenTrabajo = new OrdenTrabajo(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-
-    //        Ats objAts = new Ats(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-    //        Preinstalacion objPreinstalacion = new Preinstalacion(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-
-            Configuracion conf = new Configuracion(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-            String modoSincronizacionMikrotiks = conf.getValor("modoSincronizacionMikrotiks");
-    //        String idPCcostoVentas = conf.getValor("costo_ventas");
-
             
-            try {
-    //            String pos = request.getParameter("pos"); // posicion de la orden de trabjao
-                String id_tecnico_resp = ordenTrabajo.getIdEmpleado();
-                String bodega_movil[] = objBodega.getBodegaResponsableTecnico(id_tecnico_resp);
-
-                String puesta_tierra = ordenTrabajo.getInstalacion().getPuestaTierra();
-    //            String numero_orden = ordenTrabajo.getNumOrden();
-                String id_orden_trabajo = ordenTrabajo.getIdOrdenTrabajo();
-                String id_instalacion = ordenTrabajo.getIdInstalacion();
-                String tipo_trabajo = ordenTrabajo.getTipoTrabajo();
-                String id_cliente = ordenTrabajo.getInstalacion().getIdCliente();
-                String ruc = ordenTrabajo.getInstalacion().getRuc();
-                String razon_social = ordenTrabajo.getInstalacion().getRazonSocial();
-                String solucionado = ordenTrabajo.getSolucionado();
-                String conformidad = "NULL";
-                String atencion = "NULL";
-                String recomendacion = ordenTrabajo.getRecomendacion();
-                String id_sector = ordenTrabajo.getInstalacion().getIdSector();
-                String ip = ordenTrabajo.getInstalacion().getIp();
-                String tipo_instalacion = ordenTrabajo.getInstalacion().getTipoInstalacion();
-                String id_plan_actual = ordenTrabajo.getInstalacion().getIdPlanEstablecido();
-                String direccion = ordenTrabajo.getInstalacion().getDireccionInstalacion();
-                String mac_ant = ordenTrabajo.getMacAnterior().toUpperCase();
-                String receptor_ant = ordenTrabajo.getReceptorAnterior();
-                String equiposRetirados = ordenTrabajo.getEquiposRetirados();
-                String equiposUtilizados = ordenTrabajo.getEquiposUtilizados();
+            
+            r = "NO SE HA PODIDO OBTENER EL TEXTO DE ACEPTACION DE LA PERSONALIZACION. " + auxR;
+            if( observacion.compareTo("")!=0 ) {
                 
-                String mac_nuevo = ordenTrabajo.getInstalacion().getMac().toUpperCase();
-                String receptor_nuevo = ordenTrabajo.getInstalacion().getReceptor();
-                String set_deviceclave = ordenTrabajo.getInstalacion().getSetDeviceClave();
-                String capacidad_efectiva = ordenTrabajo.getCapacidadEfectiva();
-                String porcentaje_senal = ordenTrabajo.getInstalacion().getPorcentajeSenal();
-                porcentaje_senal = (porcentaje_senal.trim().compareTo("") != 0 ? porcentaje_senal : "0");
-                String antena_acoplada = ordenTrabajo.getInstalacion().getAntenaAcoplada();
-    //            String lat_h = request.getParameter("lat_h").compareTo("")!=0 ? request.getParameter("lat_h") : "0";
-    //            String lat_m = request.getParameter("lat_m").compareTo("")!=0 ? request.getParameter("lat_m") : "0";
-    //            String lat_s = request.getParameter("lat_s").compareTo("")!=0 ? request.getParameter("lat_s") : "0";
-    //            String lat_o = request.getParameter("lat_o");
-    //            String lon_h = request.getParameter("lon_h").compareTo("")!=0 ? request.getParameter("lon_h") : "0";
-    //            String lon_m = request.getParameter("lon_m").compareTo("")!=0 ? request.getParameter("lon_m") : "0";
-    //            String lon_s = request.getParameter("lon_s").compareTo("")!=0 ? request.getParameter("lon_s") : "0";
-    //            String lon_o = request.getParameter("lon_o");
-                String altura = ordenTrabajo.getInstalacion().getAltura();
-                String altura_antena = ordenTrabajo.getInstalacion().getAlturaAntena();
-                String num_instalacion = ordenTrabajo.getInstalacion().getNumInstalacion();
-                String latitud = ordenTrabajo.getInstalacion().getLatitud();
-                String longitud = ordenTrabajo.getInstalacion().getLongitud();
-    //            String ax_latitud_gps = String.valueOf( Integer.parseInt(lat_h) + ( Float.parseFloat(lat_m) / 60.0) + ( Float.parseFloat(lat_s) / 3600.0) ); 
-    //            String ax_longitud_gps =  "-" + ( Integer.parseInt(lon_h) + ( Float.parseFloat(lon_m) / 60.0) + ( Float.parseFloat(lon_s) / 3600.0) ); 
-                String longitud_gps = ordenTrabajo.getInstalacion().getLatitudGps();
-                String latitud_gps = ordenTrabajo.getInstalacion().getLongitudGps();
-                String idproductos = "";
-                String materiales = "";
-                String cantidades = "";
-                String vel_carga = ordenTrabajo.getVelocidadCarga();
-                vel_carga = (vel_carga.trim().compareTo("") != 0 ? vel_carga : "0");
-                String vel_descarga = ordenTrabajo.getVelocidadDescarga();
-                vel_descarga = (vel_descarga.trim().compareTo("") != 0 ? vel_descarga : "0");
-                String costos_sector[][] = objOrdenTrabajo.CostosSector(id_sector);
-    //            String id_preinstalacion = request.getParameter("id_preinstalacion");
-    //            String pre_hecha = (request.getParameter("pre_hecha") != null ? request.getParameter("pre_hecha") : "true");
-    //            String cobrar = request.getParameter("cobrar");
-    //            cobrar = cobrar.trim().toUpperCase();
-    //            String id_promocion = request.getParameter("id_promocion");
-                String procedente = ordenTrabajo.getOtProcedente();
-                String id_bodega_empleado = ordenTrabajo.getIdBodegaEmpleado();
+                Archivo archivo = new Archivo( Parametro.getDocIp(), Parametro.getDocPpuerto(), Parametro.getDocDb(), Parametro.getDocUsuario(), Parametro.getDocClave() );
+                Activo objActivo = new Activo(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
+                long num_documento = objActivo.getNunDocumento();
 
-                String firmar_documentos = "si";
-                String usuario_key = ordenTrabajo.getUsuarioKey();
-    //            // cuando es PRE-instalacion
-    //            if (tipo_trabajo.trim().compareTo("20") == 0 && id_preinstalacion.trim().compareTo("-1") != 0 && id_preinstalacion.trim().compareTo("") != 0) {
-    //                if (pre_hecha.trim().compareTo("true") == 0) {
-    //                    String pk_instalacion[] = objPreinstalacion.crearinstalacion(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave(), ordenTrabajo.getUsuarioSolucion(), ordenTrabajo.getRemoteAddr(),
-    //                            _DOCS_ELECTRONICOS, id_sucursal, id_preinstalacion, ip, id_sector, id_plan_actual, id_orden_trabajo,
-    //                            id_instalacion, cobrar, id_promocion, archivo, Parametro.getDocIp(), Parametro.getDocIp(), Parametro.getDocDb(), Parametro.getDocUsuario(), Parametro.getDocClave(), response, Parametro.getDir(), Parametro.getUrlAnexos() );
-    //                    if (pk_instalacion[0].trim().compareTo("") != 0 && pk_instalacion[0].trim().compareTo("-1") != 0) {
-    //                        id_instalacion = pk_instalacion[0];
-    //                        tipo_trabajo = "3";
-    //                    }
-    //                    r = "msg»" + pk_instalacion[1];
-    //                } else {
-    //                    if (!objOrdenTrabajo.solucionar(id_sucursal, id_orden_trabajo, Parametro.getUsuario(), Fecha.getFecha("ISO"), Fecha.getHora(), solucionado,
-    //                            conformidad, atencion, recomendacion, materiales, cantidades, set_deviceclave)) {
-    //                        r = "msg»" + objOrdenTrabajo.getError();
-    //                    } else {
-    //                        objInstalacion.ejecutar("update tbl_preinstalacion set estado='n' where id_preinstalacion='" + id_preinstalacion + "';");
-    //                        r = "msg»ORDEN DE TRABAJO REGISTRADA SATISFACTORIAMENTE. ";
-    //                    }
-    //                }
-    //
-    //            }
-                if (id_instalacion.trim().compareTo("") != 0 && id_instalacion.trim().compareTo("-1") != 0) {
-                    ////////obtener bodega de la instalacion al cliente
-                    r = "No se pudo encontrar una bodega del cliente, contacte con el Jefe de sucursal";
-                    String bodega_cliente[] = objBodega.getBodegaResponsableCliente(id_cliente, id_instalacion, "" + id_sucursal, num_instalacion, razon_social, direccion);
-                    if (bodega_cliente[0].trim().compareTo("") != 0) {
-                        boolean ok = false;
-                        boolean guardado = true;
-                        String msg = "";
-    //                    int topem = Integer.parseInt(request.getParameter("topem"));
-                        String precioactual = "";
-                        String adicionales = "";
-                        String periodo = objPrefactura.getUltimoPeriodo();
-                        String listaidnuevos = "";
-                        String listacostonuevos = "";
-                        String listadescripcionnuevos = "";
-                        String listatiposrubros = "";
-                        String listacantidadesrubros = "";
+                Bodega objBodega = new Bodega(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
 
-                        if( ordenTrabajo.getOrdenTrabajoMaterial() != null ) {
+                Auditoria auditoria = new Auditoria(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
 
-                            Iterator it = ordenTrabajo.getOrdenTrabajoMaterial().iterator();
-                            while( it.hasNext() ) {
-                                MaterialesModel materialesModel = (MaterialesModel)it.next();
-                                if ( Double.parseDouble( materialesModel.getCantidad() ) > 0 ) {
-                                    idproductos += materialesModel.getIdProducto() + ",";
-                                    materiales += materialesModel.getIdMaterial() + ",";
-                                    cantidades += materialesModel.getCantidad() + ",";
-                                    precioactual += materialesModel.getPrecioActual() + ",";
-                                    adicionales += materialesModel.getGastoadicional() + ",";
-                                    if ( Double.parseDouble( materialesModel.getGastoadicional() ) > 0) {
-                                        listaidnuevos += materialesModel.getIdProducto() + ",";
-                                        listadescripcionnuevos += materialesModel.getDetalle();
-                                        listacostonuevos += ((Double.parseDouble(materialesModel.getGastoadicional())) * Double.parseDouble(materialesModel.getPrecioActual())) + ",";
-                                        listatiposrubros += "p" + ",";
-                                        listacantidadesrubros += materialesModel.getGastoadicional() + ",";
+                Instalacion objInstalacion = new Instalacion(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
+
+                Producto objProducto = new Producto(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
+                
+                Promocion objPromocion = new Promocion(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
+
+                PreFactura objPrefactura = new PreFactura(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
+                OrdenTrabajo objOrdenTrabajo = new OrdenTrabajo(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
+
+        //        Ats objAts = new Ats(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
+        //        Preinstalacion objPreinstalacion = new Preinstalacion(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
+
+                Configuracion conf = new Configuracion(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
+                String modoSincronizacionMikrotiks = conf.getValor("modoSincronizacionMikrotiks");
+        //        String idPCcostoVentas = conf.getValor("costo_ventas");
+
+
+                try {
+        //            String pos = request.getParameter("pos"); // posicion de la orden de trabjao
+                    String id_tecnico_resp = ordenTrabajo.getIdEmpleado();
+                    String bodega_movil[] = objBodega.getBodegaResponsableTecnico(id_tecnico_resp);
+
+                    String puesta_tierra = ordenTrabajo.getInstalacion().getPuestaTierra();
+        //            String numero_orden = ordenTrabajo.getNumOrden();
+                    String id_orden_trabajo = ordenTrabajo.getIdOrdenTrabajo();
+                    String id_instalacion = ordenTrabajo.getIdInstalacion();
+                    String tipo_trabajo = ordenTrabajo.getTipoTrabajo();
+                    String id_cliente = ordenTrabajo.getInstalacion().getIdCliente();
+                    String ruc = ordenTrabajo.getInstalacion().getRuc();
+                    String razon_social = ordenTrabajo.getInstalacion().getRazonSocial();
+                    String solucionado = ordenTrabajo.getSolucionado();
+                    String conformidad = "NULL";
+                    String atencion = "NULL";
+                    String recomendacion = ordenTrabajo.getRecomendacion();
+                    String id_sector = ordenTrabajo.getInstalacion().getIdSector();
+                    String ip = ordenTrabajo.getInstalacion().getIp();
+                    String tipo_instalacion = ordenTrabajo.getInstalacion().getTipoInstalacion();
+                    String id_plan_actual = ordenTrabajo.getInstalacion().getIdPlanEstablecido();
+                    String direccion = ordenTrabajo.getInstalacion().getDireccionInstalacion();
+                    String mac_ant = ordenTrabajo.getMacAnterior().toUpperCase();
+                    String receptor_ant = ordenTrabajo.getReceptorAnterior();
+                    String equiposRetirados = ordenTrabajo.getEquiposRetirados();
+                    String equiposUtilizados = ordenTrabajo.getEquiposUtilizados();
+
+                    String mac_nuevo = ordenTrabajo.getInstalacion().getMac().toUpperCase();
+                    String receptor_nuevo = ordenTrabajo.getInstalacion().getReceptor();
+                    String set_deviceclave = ordenTrabajo.getInstalacion().getSetDeviceClave();
+                    String capacidad_efectiva = ordenTrabajo.getCapacidadEfectiva();
+                    String porcentaje_senal = ordenTrabajo.getInstalacion().getPorcentajeSenal();
+                    porcentaje_senal = (porcentaje_senal.trim().compareTo("") != 0 ? porcentaje_senal : "0");
+                    String antena_acoplada = ordenTrabajo.getInstalacion().getAntenaAcoplada();
+        //            String lat_h = request.getParameter("lat_h").compareTo("")!=0 ? request.getParameter("lat_h") : "0";
+        //            String lat_m = request.getParameter("lat_m").compareTo("")!=0 ? request.getParameter("lat_m") : "0";
+        //            String lat_s = request.getParameter("lat_s").compareTo("")!=0 ? request.getParameter("lat_s") : "0";
+        //            String lat_o = request.getParameter("lat_o");
+        //            String lon_h = request.getParameter("lon_h").compareTo("")!=0 ? request.getParameter("lon_h") : "0";
+        //            String lon_m = request.getParameter("lon_m").compareTo("")!=0 ? request.getParameter("lon_m") : "0";
+        //            String lon_s = request.getParameter("lon_s").compareTo("")!=0 ? request.getParameter("lon_s") : "0";
+        //            String lon_o = request.getParameter("lon_o");
+                    String altura = ordenTrabajo.getInstalacion().getAltura();
+                    String altura_antena = ordenTrabajo.getInstalacion().getAlturaAntena();
+                    String num_instalacion = ordenTrabajo.getInstalacion().getNumInstalacion();
+                    String latitud = ordenTrabajo.getInstalacion().getLatitud();
+                    String longitud = ordenTrabajo.getInstalacion().getLongitud();
+        //            String ax_latitud_gps = String.valueOf( Integer.parseInt(lat_h) + ( Float.parseFloat(lat_m) / 60.0) + ( Float.parseFloat(lat_s) / 3600.0) ); 
+        //            String ax_longitud_gps =  "-" + ( Integer.parseInt(lon_h) + ( Float.parseFloat(lon_m) / 60.0) + ( Float.parseFloat(lon_s) / 3600.0) ); 
+                    String longitud_gps = ordenTrabajo.getInstalacion().getLatitudGps();
+                    String latitud_gps = ordenTrabajo.getInstalacion().getLongitudGps();
+                    String idproductos = "";
+                    String materiales = "";
+                    String cantidades = "";
+                    String vel_carga = ordenTrabajo.getVelocidadCarga();
+                    vel_carga = (vel_carga.trim().compareTo("") != 0 ? vel_carga : "0");
+                    String vel_descarga = ordenTrabajo.getVelocidadDescarga();
+                    vel_descarga = (vel_descarga.trim().compareTo("") != 0 ? vel_descarga : "0");
+                    String costos_sector[][] = objOrdenTrabajo.CostosSector(id_sector);
+        //            String id_preinstalacion = request.getParameter("id_preinstalacion");
+        //            String pre_hecha = (request.getParameter("pre_hecha") != null ? request.getParameter("pre_hecha") : "true");
+        //            String cobrar = request.getParameter("cobrar");
+        //            cobrar = cobrar.trim().toUpperCase();
+        //            String id_promocion = request.getParameter("id_promocion");
+                    String procedente = ordenTrabajo.getOtProcedente();
+                    String id_bodega_empleado = ordenTrabajo.getIdBodegaEmpleado();
+
+                    String firmar_documentos = "si";
+                    String usuario_key = ordenTrabajo.getUsuarioKey();
+        //            // cuando es PRE-instalacion
+        //            if (tipo_trabajo.trim().compareTo("20") == 0 && id_preinstalacion.trim().compareTo("-1") != 0 && id_preinstalacion.trim().compareTo("") != 0) {
+        //                if (pre_hecha.trim().compareTo("true") == 0) {
+        //                    String pk_instalacion[] = objPreinstalacion.crearinstalacion(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave(), ordenTrabajo.getUsuarioSolucion(), ordenTrabajo.getRemoteAddr(),
+        //                            _DOCS_ELECTRONICOS, id_sucursal, id_preinstalacion, ip, id_sector, id_plan_actual, id_orden_trabajo,
+        //                            id_instalacion, cobrar, id_promocion, archivo, Parametro.getDocIp(), Parametro.getDocIp(), Parametro.getDocDb(), Parametro.getDocUsuario(), Parametro.getDocClave(), response, Parametro.getDir(), Parametro.getUrlAnexos() );
+        //                    if (pk_instalacion[0].trim().compareTo("") != 0 && pk_instalacion[0].trim().compareTo("-1") != 0) {
+        //                        id_instalacion = pk_instalacion[0];
+        //                        tipo_trabajo = "3";
+        //                    }
+        //                    r = "msg»" + pk_instalacion[1];
+        //                } else {
+        //                    if (!objOrdenTrabajo.solucionar(id_sucursal, id_orden_trabajo, Parametro.getUsuario(), Fecha.getFecha("ISO"), Fecha.getHora(), solucionado,
+        //                            conformidad, atencion, recomendacion, materiales, cantidades, set_deviceclave)) {
+        //                        r = "msg»" + objOrdenTrabajo.getError();
+        //                    } else {
+        //                        objInstalacion.ejecutar("update tbl_preinstalacion set estado='n' where id_preinstalacion='" + id_preinstalacion + "';");
+        //                        r = "msg»ORDEN DE TRABAJO REGISTRADA SATISFACTORIAMENTE. ";
+        //                    }
+        //                }
+        //
+        //            }
+        
+                    r = "NO SE HA PODIDO CARGAR INFORMACION DE LA INSTALACION";
+                    if (id_instalacion.trim().compareTo("") != 0 && id_instalacion.trim().compareTo("-1") != 0) {
+                        
+                        ////////obtener bodega de la instalacion al cliente
+                        r = "No se pudo encontrar una bodega del cliente, contacte con el Jefe de sucursal";
+                        String bodega_cliente[] = objBodega.getBodegaResponsableCliente(id_cliente, id_instalacion, "" + id_sucursal, num_instalacion, razon_social, direccion);
+                        if (bodega_cliente[0].trim().compareTo("") != 0) {
+                            boolean ok = false;
+                            boolean guardado = true;
+                            String msg = "";
+        //                    int topem = Integer.parseInt(request.getParameter("topem"));
+                            String precioactual = "";
+                            String adicionales = "";
+                            String periodo = objPrefactura.getUltimoPeriodo();
+                            String listaidnuevos = "";
+                            String listacostonuevos = "";
+                            String listadescripcionnuevos = "";
+                            String listatiposrubros = "";
+                            String listacantidadesrubros = "";
+
+                            if( ordenTrabajo.getOrdenTrabajoMaterial() != null ) {
+
+                                Iterator it = ordenTrabajo.getOrdenTrabajoMaterial().iterator();
+                                while( it.hasNext() ) {
+                                    MaterialesModel materialesModel = (MaterialesModel)it.next();
+                                    if ( Double.parseDouble( materialesModel.getCantidad() ) > 0 ) {
+                                        idproductos += materialesModel.getIdProducto() + ",";
+                                        materiales += materialesModel.getIdMaterial() + ",";
+                                        cantidades += materialesModel.getCantidad() + ",";
+                                        precioactual += materialesModel.getPrecioActual() + ",";
+                                        adicionales += materialesModel.getGastoadicional() + ",";
+                                        if ( Double.parseDouble( materialesModel.getGastoadicional() ) > 0) {
+                                            listaidnuevos += materialesModel.getIdProducto() + ",";
+                                            listadescripcionnuevos += materialesModel.getDetalle();
+                                            listacostonuevos += ((Double.parseDouble(materialesModel.getGastoadicional())) * Double.parseDouble(materialesModel.getPrecioActual())) + ",";
+                                            listatiposrubros += "p" + ",";
+                                            listacantidadesrubros += materialesModel.getGastoadicional() + ",";
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if (materiales.compareTo("") != 0) {
-                            idproductos = idproductos.substring(0, idproductos.length() - 1);
-                            materiales = materiales.substring(0, materiales.length() - 1);
-                            cantidades = cantidades.substring(0, cantidades.length() - 1);
-                            precioactual = precioactual.substring(0, precioactual.length() - 1);
-                        }
+                            if (materiales.compareTo("") != 0) {
+                                idproductos = idproductos.substring(0, idproductos.length() - 1);
+                                materiales = materiales.substring(0, materiales.length() - 1);
+                                cantidades = cantidades.substring(0, cantidades.length() - 1);
+                                precioactual = precioactual.substring(0, precioactual.length() - 1);
+                            }
 
-                        //String macs_nuevas = mac_nuevo.compareTo("")!=0 ? mac_nuevo+"," : "";
-                        String idsActivos = mac_nuevo.compareTo("") != 0 ? objActivo.getIdActivo(mac_nuevo) + "," : "";
-                        //String macs_retiradas = mac_ant.compareTo("")!=0 ? mac_ant+"," : "";
-                        String idsActivosRet = mac_ant.compareTo("") != 0 ? objActivo.getIdActivo(mac_ant) + "," : "";
-                        
-                        String axEquiposRetirados[] = equiposRetirados.split(",");
-                        for(int x=0; x<axEquiposRetirados.length; x++){
-                            idsActivosRet += objActivo.getIdActivo( axEquiposRetirados[x] ) + ",";
-                        }
-                        
-                        String axEquiposUtilizados[] = equiposUtilizados.split(",");
-                        for(int x=0; x<axEquiposUtilizados.length; x++){
-                            idsActivos += objActivo.getIdActivo( axEquiposUtilizados[x] ) + ",";
-                        }
-                        
-    //                    String codigo_activo = "";
+                            //String macs_nuevas = mac_nuevo.compareTo("")!=0 ? mac_nuevo+"," : "";
+                            String idsActivos = mac_nuevo.compareTo("") != 0 ? objActivo.getIdActivo(mac_nuevo) + "," : "";
+                            //String macs_retiradas = mac_ant.compareTo("")!=0 ? mac_ant+"," : "";
+                            String idsActivosRet = mac_ant.compareTo("") != 0 ? objActivo.getIdActivo(mac_ant) + "," : "";
 
-                        ////variables para reposiciones
-    //                    String idsActivos1 = "";
-    //                    String idsActivosRet1 = "";
-    //                    String idsMacs = "";
+                            String axEquiposRetirados[] = equiposRetirados.split(",");
+                            for(int x=0; x<axEquiposRetirados.length; x++){
+                                idsActivosRet += objActivo.getIdActivo( axEquiposRetirados[x] ) + ",";
+                            }
 
-                        if( ordenTrabajo.getReposicionEquipos() != null ) {
+                            String axEquiposUtilizados[] = equiposUtilizados.split(",");
+                            for(int x=0; x<axEquiposUtilizados.length; x++){
+                                idsActivos += objActivo.getIdActivo( axEquiposUtilizados[x] ) + ",";
+                            }
 
-                            Iterator it = ordenTrabajo.getReposicionEquipos().iterator();
-                            while( it.hasNext() ) {
-                                ReposicionEquiposModel reposicionEquipos = (ReposicionEquiposModel)it.next();
-                                if (reposicionEquipos.getIdActivoNuevo()!= null) {
-                                    idsActivos += reposicionEquipos.getIdActivoNuevo() + ",";
-                                }
+        //                    String codigo_activo = "";
 
-                                if (reposicionEquipos.getIdActivoActual() != null) {
-                                    idsActivosRet += reposicionEquipos.getIdActivoActual() + ",";
-                                }
+                            ////variables para reposiciones
+        //                    String idsActivos1 = "";
+        //                    String idsActivosRet1 = "";
+        //                    String idsMacs = "";
 
-                                /// reposicion de equipos por daño o perdida
-                                if (reposicionEquipos.getTipoReposicion() != null) {
-                                    String estadorepo = reposicionEquipos.getTipoReposicion();
-                                    ////reposicion por remplazo
-                                    if (estadorepo.trim().compareTo("0") == 0) {
+                            if( ordenTrabajo.getReposicionEquipos() != null ) {
+
+                                Iterator it = ordenTrabajo.getReposicionEquipos().iterator();
+                                while( it.hasNext() ) {
+                                    ReposicionEquiposModel reposicionEquipos = (ReposicionEquiposModel)it.next();
+                                    if (reposicionEquipos.getIdActivoNuevo()!= null) {
                                         idsActivos += reposicionEquipos.getIdActivoNuevo() + ",";
+                                    }
+
+                                    if (reposicionEquipos.getIdActivoActual() != null) {
                                         idsActivosRet += reposicionEquipos.getIdActivoActual() + ",";
+                                    }
 
-                                    } ////reposicion de perdida de equipos y cobro nuevo
-                                    else {
-    //                                    codigo_activo = request.getParameter("macacf" + i);
-    //                                    String codigo_activo_nuevo = request.getParameter("macnuf" + i);
-    //                                    idsActivos1 += reposicionEquipos.getIdActivoNuevo() + ",";
-                                        try {
-                                            ///bajas de activos por perdidad de equipos 
-                                            ResultSet rs = objActivo.getActivo( reposicionEquipos.getIdActivoActual() );
-                                            if (rs.next()) {
-                                                String motivo = "PERDIDA DE EQUIPO EN ORDEN DE TRABAJO DE CLIENTE";
-                                                String idactivo = (rs.getString("id_activo") != null ? rs.getString("id_activo") : "");
-                                                String descripcion = (rs.getString("descripcion") != null ? rs.getString("descripcion") : "");
-                                                String compra = (rs.getString("valor_compra") != null ? rs.getString("valor_compra") : "");
-                                                String depreciacion = (rs.getString("valor_depreciado") != null ? rs.getString("valor_depreciado") : "");
-                                                Double perdida = Double.parseDouble(compra) - Double.parseDouble(depreciacion);
-                                                if (objActivo.darVaja(id_sucursal, idactivo, ordenTrabajo.getUsuarioSolucion(), String.valueOf(perdida), motivo)) {
-                                                    auditoria.setRegistro( ordenTrabajo.getUsuarioSolucion(), ordenTrabajo.getRemoteAddr(), "BAJA DEL ACTIVO: " + descripcion + " " + motivo);
+                                    /// reposicion de equipos por daño o perdida
+                                    if (reposicionEquipos.getTipoReposicion() != null) {
+                                        String estadorepo = reposicionEquipos.getTipoReposicion();
+                                        ////reposicion por remplazo
+                                        if (estadorepo.trim().compareTo("0") == 0) {
+                                            idsActivos += reposicionEquipos.getIdActivoNuevo() + ",";
+                                            idsActivosRet += reposicionEquipos.getIdActivoActual() + ",";
+
+                                        } ////reposicion de perdida de equipos y cobro nuevo
+                                        else {
+        //                                    codigo_activo = request.getParameter("macacf" + i);
+        //                                    String codigo_activo_nuevo = request.getParameter("macnuf" + i);
+        //                                    idsActivos1 += reposicionEquipos.getIdActivoNuevo() + ",";
+                                            try {
+                                                ///bajas de activos por perdidad de equipos 
+                                                ResultSet rs = objActivo.getActivo( reposicionEquipos.getIdActivoActual() );
+                                                if (rs.next()) {
+                                                    String motivo = "PERDIDA DE EQUIPO EN ORDEN DE TRABAJO DE CLIENTE";
+                                                    String idactivo = (rs.getString("id_activo") != null ? rs.getString("id_activo") : "");
+                                                    String descripcion = (rs.getString("descripcion") != null ? rs.getString("descripcion") : "");
+                                                    String compra = (rs.getString("valor_compra") != null ? rs.getString("valor_compra") : "");
+                                                    String depreciacion = (rs.getString("valor_depreciado") != null ? rs.getString("valor_depreciado") : "");
+                                                    Double perdida = Double.parseDouble(compra) - Double.parseDouble(depreciacion);
+                                                    if (objActivo.darVaja(id_sucursal, idactivo, ordenTrabajo.getUsuarioSolucion(), String.valueOf(perdida), motivo)) {
+                                                        auditoria.setRegistro( ordenTrabajo.getUsuarioSolucion(), ordenTrabajo.getRemoteAddr(), "BAJA DEL ACTIVO: " + descripcion + " " + motivo);
+                                                    }
                                                 }
-                                            }
-                                            rs.close();
+                                                rs.close();
 
-                                            ///rubos de activos obtener informacion
-                                            ResultSet rsn = objActivo.getActivo( reposicionEquipos.getIdActivoNuevo() );
-                                            if (rsn.next()) {
-                                                listaidnuevos += (rsn.getString("id_activo") != null ? rsn.getString("id_activo") : "") + ",";
-                                                listadescripcionnuevos += (rsn.getString("descripcion") != null ? rsn.getString("descripcion") : "") + ",";
-                                                listacostonuevos += (rsn.getString("valor_compra") != null ? rsn.getString("valor_compra") : "") + ",";
-                                                listatiposrubros += "1" + ",";
-                                                listacantidadesrubros += "1" + ",";
-                                            }
+                                                ///rubos de activos obtener informacion
+                                                ResultSet rsn = objActivo.getActivo( reposicionEquipos.getIdActivoNuevo() );
+                                                if (rsn.next()) {
+                                                    listaidnuevos += (rsn.getString("id_activo") != null ? rsn.getString("id_activo") : "") + ",";
+                                                    listadescripcionnuevos += (rsn.getString("descripcion") != null ? rsn.getString("descripcion") : "") + ",";
+                                                    listacostonuevos += (rsn.getString("valor_compra") != null ? rsn.getString("valor_compra") : "") + ",";
+                                                    listatiposrubros += "1" + ",";
+                                                    listacantidadesrubros += "1" + ",";
+                                                }
 
-                                            rsn.close();
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
+                                                rsn.close();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
                                         }
                                     }
+
                                 }
 
-                            }
+                            }   
 
-                        }   
-
-                        String id_personalizacion[] = null;
-                        if (guardado) {
-                            PdfDocumental ObjPdfDocumental = new PdfDocumental();
-                            ObjPdfDocumental.setConexion( Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave(), 
-                                                Parametro.getDocIp(), Parametro.getDocPpuerto(), Parametro.getDocDb(), Parametro.getDocUsuario(), Parametro.getDocClave()
-                                            );
-                            boolean oka = false;
-                            if (firmar_documentos.trim().compareTo("si") == 0 && obligado_firmar && firma_ordenes.compareTo("true") == 0) {
-                                String oki = ObjPdfDocumental.ValidarKeys( Parametro.getDir(), id_empleado, usuario_key);
-                                if (oki.compareTo("") == 0) {
-                                    oka = true;
-                                } else {
-                                    r = oki;
-                                }
-                            } else if ((firmar_documentos.trim().compareTo("no") == 0 || !obligado_firmar || firma_ordenes.compareTo("false") == 0)) {
-                                oka = true;
-                            }
-                            if (oka) {
-                                if (idsActivos.compareTo("") != 0) {
-                                    idsActivos = idsActivos.substring(0, idsActivos.length() - 1);
-                                    idsActivos = Matriz.QuitarRepetidos(idsActivos, ",");
-                                }
-                                if (idsActivosRet.compareTo("") != 0) {
-                                    idsActivosRet = idsActivosRet.substring(0, idsActivosRet.length() - 1);
-                                    idsActivosRet = Matriz.QuitarRepetidos(idsActivosRet, ",");
-                                    idsActivosRet = idsActivosRet != null ? idsActivosRet : "";
-                                }
-                                if (tipo_trabajo.compareTo("3") == 0) {     //  instalaciones
-                                    String resultado = objActivo.validar_personalizacion(idsActivos, idsActivosRet, tipo_trabajo, bodega_cliente[0], id_instalacion, "" + id_sucursal, id_bodega_empleado, ordenTrabajo.getRemoteAddr(), observacion, id_orden_trabajo);
-                                    id_personalizacion = resultado.split(";");
-                                    msg = id_personalizacion[1];
-                                    if (id_personalizacion[2].compareTo("-1") != 0) {
-                                        auditoria.setRegistro( ordenTrabajo.getUsuarioSolucion(), ordenTrabajo.getRemoteAddr(), "REGISTRO DE DOCUMENTO DE PERSONALIZACION DE ACTIVOS ID: " + id_personalizacion[2]);
-                                        String fecha_instalacion = ordenTrabajo.getInstalacion().getFechaInstalacion();
-                                        String estado_instalacion = ordenTrabajo.getInstalacion().getEstadoInstalacion();
-    //                                    if (id_preinstalacion.trim().compareTo("-1") != 0 && id_preinstalacion.trim().compareTo("") != 0) {
-    //                                        fecha_instalacion = Fecha.getAnio() + "-" + Fecha.getMes() + "-" + Fecha.getDia();
-    //                                        estado_instalacion = "i";
-    //                                    }
-                                        if (!objInstalacion.insertarPostInstalacion(id_instalacion, id_sucursal, fecha_instalacion, receptor_nuevo, mac_nuevo, idsActivos,
-                                                id_personalizacion[2], porcentaje_senal, antena_acoplada, tipo_instalacion, id_plan_actual, "true", conformidad, atencion,
-                                                estado_instalacion, latitud, longitud, altura, altura_antena, latitud_gps, longitud_gps)) {
-                                            objActivo.aceptar_anular_personalizacion("" + id_sucursal, "error de orden", ordenTrabajo.getRemoteAddr(), observacion, "anular", id_personalizacion[2]);
-                                        } else {
-                                            ok = true;
-                                        }
-
-                                    }
-
-                                } else if (tipo_trabajo.compareTo("4") == 0) {      //desinstalacion
-                                    FacturaVenta objFactura = new FacturaVenta(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-                                    boolean sin_deuda = objFactura.instalacionSinDeuda(id_instalacion);
-                                    String estado_servicio = "t";
-                                    if (idsActivosRet.compareTo("") != 0) {
-                                        estado_servicio = "e";
-                                        if (sin_deuda) {
-                                            estado_servicio = "t";
-                                        }
+                            String id_personalizacion[] = null;
+                            if (guardado) {
+                                PdfDocumental ObjPdfDocumental = new PdfDocumental();
+                                ObjPdfDocumental.setConexion( Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave(), 
+                                                    Parametro.getDocIp(), Parametro.getDocPpuerto(), Parametro.getDocDb(), Parametro.getDocUsuario(), Parametro.getDocClave()
+                                                );
+                                boolean oka = false;
+                                if (firmar_documentos.trim().compareTo("si") == 0 && obligado_firmar && firma_ordenes.compareTo("true") == 0) {
+                                    String oki = ObjPdfDocumental.ValidarKeys( Parametro.getDir(), id_empleado, usuario_key);
+                                    if (oki.compareTo("") == 0) {
+                                        oka = true;
                                     } else {
-                                        if (sin_deuda) {
-                                            estado_servicio = "d";
-                                        } else {
-                                            estado_servicio = "r";
-                                        }
+                                        r = oki;
                                     }
-                                    String resultado = objActivo.validar_personalizacion(idsActivos, idsActivosRet, tipo_trabajo, bodega_cliente[0], id_instalacion, "" + id_sucursal, id_bodega_empleado, ordenTrabajo.getRemoteAddr(), observacion, id_orden_trabajo);
-                                    id_personalizacion = resultado.split(";");
-                                    msg = id_personalizacion[1];
-                                    if (id_personalizacion[2].compareTo("-1") != 0) {
-                                        objInstalacion.desInstalar(id_instalacion, id_cliente, recomendacion, estado_servicio, idsActivosRet);
-                                        ok = true;
-                                        auditoria.setRegistro( ordenTrabajo.getUsuarioSolucion(), ordenTrabajo.getRemoteAddr(), "REGISTRO DE DOCUMENTO DE PERSONALIZACION DE ACTIVOS Nro.: " + num_documento);
-                                        num_documento++;
+                                } else if ((firmar_documentos.trim().compareTo("no") == 0 || !obligado_firmar || firma_ordenes.compareTo("false") == 0)) {
+                                    oka = true;
+                                }
+                                if (oka) {
+                                    if (idsActivos.compareTo("") != 0) {
+                                        idsActivos = idsActivos.substring(0, idsActivos.length() - 1);
+                                        idsActivos = Matriz.QuitarRepetidos(idsActivos, ",");
                                     }
-
-                                } else {    //    revision general y demas
-
-                                    ok = false;
-                                    msg = "Error: empleado no dispone de una bodega para personalizaciones (utilizada para ordenes de trabajo), contáctese con el jefe de sucursal, para que le asigne una bodega.";
-                                    if (id_bodega_empleado.compareTo("") != 0) {
-
+                                    if (idsActivosRet.compareTo("") != 0) {
+                                        idsActivosRet = idsActivosRet.substring(0, idsActivosRet.length() - 1);
+                                        idsActivosRet = Matriz.QuitarRepetidos(idsActivosRet, ",");
+                                        idsActivosRet = idsActivosRet != null ? idsActivosRet : "";
+                                    }
+                                    if (tipo_trabajo.compareTo("3") == 0) {     //  instalaciones
                                         String resultado = objActivo.validar_personalizacion(idsActivos, idsActivosRet, tipo_trabajo, bodega_cliente[0], id_instalacion, "" + id_sucursal, id_bodega_empleado, ordenTrabajo.getRemoteAddr(), observacion, id_orden_trabajo);
                                         id_personalizacion = resultado.split(";");
                                         msg = id_personalizacion[1];
-                                        if (id_personalizacion[3].compareTo("-1") != 0 && id_personalizacion[2].compareTo("-1") != 0) {
-                                            ok = true;
-                                            if (objInstalacion.setactualizar(id_instalacion, id_orden_trabajo, id_sector, direccion, ip, mac_ant, idsActivosRet, receptor_ant, mac_nuevo,
-                                                    idsActivos, receptor_nuevo, porcentaje_senal, antena_acoplada, latitud, longitud, altura, altura_antena, latitud_gps, longitud_gps)) {
-                                                ok = true;
-                                                r = "Actualización de datos del registro de instalación y personalización del equipo al cliente realizada con éxito.";
-                                            } else {
-                                                ok = false;
-                                                msg = "Error en actualizacion de datos de instalacion " + objInstalacion.getError();
-                                                if (id_personalizacion[2].compareTo("-1") != 0) {
-                                                    objActivo.aceptar_anular_personalizacion("" + id_sucursal, "error de orden", ordenTrabajo.getRemoteAddr(), observacion, "anular", id_personalizacion[2]);
-                                                }
-                                                if (id_personalizacion[3].compareTo("-1") != 0) {
-                                                    objActivo.aceptar_anular_personalizacion("" + id_sucursal, "error de orden", ordenTrabajo.getRemoteAddr(), observacion, "anular", id_personalizacion[3]);
-                                                }
-                                            }
-                                        }
-
-                                    }
-
-                                }
-                                if (ok) {
-                                    /* if (!objOrdenTrabajo.solucionar(id_sucursal, id_orden_trabajo, Parametro._usuario, Fecha.getFecha("ISO"), Fecha.getHora(), solucionado,
-                                        conformidad, atencion, recomendacion, materiales, cantidades, set_deviceclave)) {
-                                    r = "msg»" + objOrdenTrabajo.getError();
-                                } else {*/
-                                    List sql = new ArrayList();
-                                    /*actualizar informacion en la orden de la capacidad efectiva  velocidades de carga , ordenes no procedente*/
-                                    sql.add("UPDATE tbl_orden_trabajo SET capacidad_efectiva='" + capacidad_efectiva + "',velocidad_carga='" + vel_carga + "',velocidad_descarga='" + vel_descarga + "',ot_procedente='" + procedente + "' "
-                                            + " WHERE id_orden_trabajo='" + id_orden_trabajo + "';");
-                                    sql.add("update tbl_soporte set procedente='" + procedente + "' where id_soporte=(select tmp.id_soporte from tbl_orden_trabajo as tmp where tmp.id_orden_trabajo='" + id_orden_trabajo + "');");
-                                    /* fin actualizar informacion en la orden de la capacidad efectiva  velocidades de carga , ordenes no procedente*/
-     /*actualizar informacion sisq proviene desde un certificado*/
-                                    String id_instalacion_certificado = objOrdenTrabajo.getInstalacionCertificado(id_orden_trabajo);
-                                    int croquis = archivo.ExisteArchivo("tbl_instalacion_croquis", id_instalacion_certificado, "imgcroquisnuevo");
-                                    if (croquis > 0) {
-                                        archivo.ejecutar("update tbl_documentos  "
-                                                + " set documento=(select t1.documento from tbl_documentos as t1 where t1.tabla='tbl_instalacion_croquis' and t1.campo_tabla='imgcroquisnuevo' and t1.id_tabla='" + id_instalacion_certificado + "'), "
-                                                + " nombre_documento=(select t1.nombre_documento from tbl_documentos as t1 where t1.tabla='tbl_instalacion_croquis' and t1.campo_tabla='imgcroquisnuevo' and t1.id_tabla='" + id_instalacion_certificado + "') "
-                                                + " where tabla='tbl_instalacion' and campo_tabla='imgcroquis' and id_tabla='" + id_instalacion + "'");
-                                    }
-                                    sql.add("UPDATE tbl_instalacion  as i "
-                                            + " SET id_provincia=c.id_provincia,id_ciudad=c.id_canton,id_parroquia=c.id_parroquia,id_sector=c.id_sector, "
-                                            + " id_plan_actual=c.id_plan,direccion_instalacion=substring(c.direccion,0,199),convenio_pago=c.modalidad_pago,tipo_instalacion=c.tipo_instalacion "
-                                            + " FROM tbl_instalacion_certificado as c "
-                                            + " WHERE i.id_instalacion = c.id_instalacion and c.id_instalacion_certificado='" + id_instalacion_certificado + "' and c.fecha_creada>='2019-09-24';");
-                                    /*fin actualizar informacion sisq proviene desde un certificado*/
-     /*inserttar rubros adicionales de cambios de domicio orden no procedente o migraciones*/
-                                    String[] anticipos = objOrdenTrabajo.getAnticipoOrdenTrabajo(id_orden_trabajo);
-
-                                    //  cambios de domicilio
-                                    if ((tipo_trabajo.trim().compareTo("2") == 0 || tipo_trabajo.trim().compareTo("14") == 0) && procedente.trim().compareTo("true") == 0) {
-    //                                    if ( objOrdenTrabajo.getCambiosDomicilio(id_instalacion, "'2','14'", id_orden_trabajo) ) {
-                                        if ( objInstalacion.numCertificadosEnAnio(id_instalacion, "2,3") > 1 ) {
-                                            int indice = (tipo_trabajo.trim().compareTo("2") == 0 ? 0 : 1);
-                                            if (this.SetFactura(id_instalacion, costos_sector, anticipos, indice)[0].compareTo("-1") == 0) {
-                                                sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro)VALUES ('" + id_sucursal + "','" + costos_sector[indice][0] + "' ,'" + id_instalacion + "', '" + costos_sector[indice][1] + "','" + periodo + "'::date + '1 month'::interval, '" + costos_sector[indice][2] + "','p');");
-                                            }
-                                        }
-                                    }
-
-                                    //  migraciones
-                                    if ((tipo_trabajo.trim().compareTo("13") == 0 || tipo_trabajo.trim().compareTo("22") == 0) && procedente.trim().compareTo("true") == 0) {
-                                        if ( !objOrdenTrabajo.getMgracionGratuita(id_orden_trabajo) && objInstalacion.numCertificadosEnAnio(id_instalacion, "4,5") > 1 ) {
-                                            int indice = (tipo_trabajo.trim().compareTo("13") == 0 ? 3 : 2);
-                                            if (this.SetFactura(id_instalacion, costos_sector, anticipos, indice)[0].compareTo("-1") == 0) {
-                                                sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro)VALUES ('" + id_sucursal + "','" + costos_sector[indice][0] + "' ,'" + id_instalacion + "', '" + costos_sector[indice][1] + "','" + periodo + "'::date + '1 month'::interval, '" + costos_sector[indice][2] + "','p');");
-                                            }
-                                        }
-                                    }
-
-                                    if (procedente.trim().compareTo("false") == 0 && tipo_trabajo.trim().compareTo("3") != 0 && tipo_trabajo.trim().compareTo("4") != 0) {
-                                        int indice = 4;
-                                        if (this.SetFactura(id_instalacion, costos_sector, anticipos, indice)[0].compareTo("-1") == 0) {
-                                            sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro)VALUES ('" + id_sucursal + "','" + costos_sector[indice][0] + "' ,'" + id_instalacion + "', '" + costos_sector[indice][1] + "','" + periodo + "'::date + '1 month'::interval, '" + costos_sector[indice][2] + "','p');");
-                                        }
-                                    }
-                                    /*inserttar rubros adicionales de cambios de domicio orden no procedente o migraciones*/
-
-                                    ///encrustado
-                                    ////kardex y asiento contable
-                                    if (!materiales.equals("")) {
-                                        sql = objOrdenTrabajo.setactualizarconsumible(id_orden_trabajo, materiales, adicionales, sql);
-                                        String detalle = "CONSUMO DE MATERIAL INSTALADO EN ORDEN DE TRABAJO CLIENTE DOCUMENTO N°. ";
-                                        sql = objOrdenTrabajo.kardexdeconsumoproducto(idproductos, cantidades, precioactual, id_sucursal, detalle, id_orden_trabajo, id_tecnico_resp, id_cliente, "Ordenes de trabajo cliente", sql);
-                                    }
-                                    ////agregar los rubos nuevos
-                                    if (listaidnuevos.compareTo("") != 0) {
-                                        listaidnuevos = listaidnuevos.substring(0, listaidnuevos.length() - 1);
-                                        listacostonuevos = listacostonuevos.substring(0, listacostonuevos.length() - 1);
-                                        listadescripcionnuevos = listadescripcionnuevos.substring(0, listadescripcionnuevos.length() - 1);
-                                        listatiposrubros = listatiposrubros.substring(0, listatiposrubros.length() - 1);
-                                        listacantidadesrubros = listacantidadesrubros.substring(0, listacantidadesrubros.length() - 1);
-                                        sql = objActivo.agregarRubroprefactura(id_sucursal, id_instalacion, listaidnuevos, listacostonuevos, listadescripcionnuevos, periodo, listatiposrubros, listacantidadesrubros, sql);
-                                    }
-                                    if (!objOrdenTrabajo.solucionar(id_sucursal, id_orden_trabajo, ordenTrabajo.getUsuarioSolucion(), Fecha.getFecha("ISO"), Fecha.getHora(), solucionado,
-                                            conformidad, atencion, recomendacion, materiales, cantidades, set_deviceclave, sql)) {
                                         if (id_personalizacion[2].compareTo("-1") != 0) {
-                                            objActivo.aceptar_anular_personalizacion("" + id_sucursal, "error de orden", ordenTrabajo.getRemoteAddr(), observacion, "anular", id_personalizacion[2]);
+                                            auditoria.setRegistro( ordenTrabajo.getUsuarioSolucion(), ordenTrabajo.getRemoteAddr(), "REGISTRO DE DOCUMENTO DE PERSONALIZACION DE ACTIVOS ID: " + id_personalizacion[2]);
+                                            String fecha_instalacion = ordenTrabajo.getInstalacion().getFechaInstalacion();
+                                            String estado_instalacion = ordenTrabajo.getInstalacion().getEstadoInstalacion();
+        //                                    if (id_preinstalacion.trim().compareTo("-1") != 0 && id_preinstalacion.trim().compareTo("") != 0) {
+        //                                        fecha_instalacion = Fecha.getAnio() + "-" + Fecha.getMes() + "-" + Fecha.getDia();
+        //                                        estado_instalacion = "i";
+        //                                    }
+                                            if (!objInstalacion.insertarPostInstalacion(id_instalacion, id_sucursal, fecha_instalacion, receptor_nuevo, mac_nuevo, idsActivos,
+                                                    id_personalizacion[2], porcentaje_senal, antena_acoplada, tipo_instalacion, id_plan_actual, "true", conformidad, atencion,
+                                                    estado_instalacion, latitud, longitud, altura, altura_antena, latitud_gps, longitud_gps)) {
+                                                objActivo.aceptar_anular_personalizacion("" + id_sucursal, "error de orden", ordenTrabajo.getRemoteAddr(), observacion, "anular", id_personalizacion[2]);
+                                            } else {
+                                                ok = true;
+                                            }
+
                                         }
-                                        if (id_personalizacion[3].compareTo("-1") != 0) {
-                                            objActivo.aceptar_anular_personalizacion("" + id_sucursal, "error de orden", ordenTrabajo.getRemoteAddr(), observacion, "anular", id_personalizacion[3]);
-                                        }
-                                        r = objOrdenTrabajo.getError();
 
-                                    } else {
-
-
-
-    //  el asiento de salida de suministros se lo hace al entregar al tecnico y enla venta se realiza el mismo asiento. Se reasliza solo el asiento de la venta por eso no se debe realizar ninguna reversion                                    
-
-    //                                    //  reversar suministro adicional, ya que se contabiliza nuevamente en la emision de la factura
-    //                                    if(listacantidadesrubros.compareTo("")!=0) {
-    //                                        
-    //                                        ComprobanteDiario objComprobanteDiario = new ComprobanteDiario(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-    //                                        
-    //                                        String detalle;
-    //                                        String idProducto[] = listaidnuevos.split(",");
-    //                                        String descripcionProducto[] = listadescripcionnuevos.split(",");
-    //                                        String montos[] = listacostonuevos.split(",");
-    //                                        for (int i = 0; i < montos.length; i++) {
-    //                                            try{
-    //                                                detalle = "REVERSION DE TRASPASO DE CONSUMO DE SUMINISTROS " + descripcionProducto[i] + " POR EXCESO EN ORDEN DE TRABAJO " + numero_orden;
-    //                                                String param = "['"+objProducto.getIdPCcompras( idProducto[i] )+"','"+montos[i]+"','0'],";
-    //                                                param += "['"+idPCcostoVentas+"','0','"+montos[i]+"']";
-    //                                                ResultSet res = objComprobanteDiario.consulta("select proc_comprobanteDiario("+id_sucursal+", "+objComprobanteDiario.getNumComprobante()+", now()::date, '"+detalle+"', "+montos[i]+", array["+param+"]);");
-    ////                                                if(res.next()){
-    ////                                                    num = (res.getString(1)!=null) ? res.getInt(1) : -1;
-    ////                                                    res.close();
-    ////                                                }
-    //                                            }catch(Exception e){
-    //                                                e.printStackTrace();
-    //                                            }
-    //                                        }
-    //                                        objComprobanteDiario.cerrar();
-    //                                    }
-
-                                        File archivo_entrada = new File(Parametro.getDir(), "eordentrabajo" + Fecha.getFechaHora() + ".pdf");
-                                        String oki = ObjPdfDocumental.PdfOrdenTrabajoCliente(id_orden_trabajo, archivo_entrada);
-                                        if (oki != null && firmar_documentos.trim().compareTo("si") == 0 && obligado_firmar && firma_ordenes.compareTo("true") == 0) {
-                                            try{
-                                                List Keys = ObjPdfDocumental.getKeys();
-                                                Properties parametros = ObjPdfDocumental.getPropiedadesPdf(id_sucursal);
-                                                CordenadasXY cordenadasXY = new CordenadasXY();
-                                                List cordenadas = cordenadasXY.CordenadasXY(archivo_entrada, "_firma_responsable_");
-                                                File archivo_salida = new File(Parametro.getDir(), "sordentrabajo" + Fecha.getFechaHora() + ".pdf");
-                                                File archivo_firma = Firmas.ValidarFirma(archivo_entrada.getAbsolutePath(), archivo_salida.getAbsolutePath(), true, cordenadas, Keys, parametros);
-                                                if (archivo_firma != null) {
-                                                    ok = archivo.setArchivoDocumental("tbl_orden_trabajo", id_orden_trabajo, "documento_digital", archivo_firma.getName(), archivo_firma.getAbsolutePath(), "public", "db_isp");
-                                                }
-                                            } catch(Exception e){
-                                                e.printStackTrace();
+                                    } else if (tipo_trabajo.compareTo("4") == 0) {      //desinstalacion
+                                        FacturaVenta objFactura = new FacturaVenta(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
+                                        boolean sin_deuda = objFactura.instalacionSinDeuda(id_instalacion);
+                                        String estado_servicio = "t";
+                                        if (idsActivosRet.compareTo("") != 0) {
+                                            estado_servicio = "e";
+                                            if (sin_deuda) {
+                                                estado_servicio = "t";
                                             }
                                         } else {
-                                            File archivo_firma = new File(Parametro.getDir(), oki);
-                                            ok = archivo.setArchivoDocumental("tbl_orden_trabajo", id_orden_trabajo, "documento_digital", archivo_firma.getName(), archivo_firma.getAbsolutePath(), "public", "db_isp");
+                                            if (sin_deuda) {
+                                                estado_servicio = "d";
+                                            } else {
+                                                estado_servicio = "r";
+                                            }
+                                        }
+                                        String resultado = objActivo.validar_personalizacion(idsActivos, idsActivosRet, tipo_trabajo, bodega_cliente[0], id_instalacion, "" + id_sucursal, id_bodega_empleado, ordenTrabajo.getRemoteAddr(), observacion, id_orden_trabajo);
+                                        id_personalizacion = resultado.split(";");
+                                        msg = id_personalizacion[1];
+                                        if (id_personalizacion[2].compareTo("-1") != 0) {
+                                            objInstalacion.desInstalar(id_instalacion, id_cliente, recomendacion, estado_servicio, idsActivosRet);
+                                            ok = true;
+                                            auditoria.setRegistro( ordenTrabajo.getUsuarioSolucion(), ordenTrabajo.getRemoteAddr(), "REGISTRO DE DOCUMENTO DE PERSONALIZACION DE ACTIVOS Nro.: " + num_documento);
+                                            num_documento++;
                                         }
 
-                                        if( modoSincronizacionMikrotiks.compareTo("apis") == 0 ) {
-                                            Mikrotik objMikrotik = new Mikrotik(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
-                                            ResultSet rsInfoIncta = objMikrotik.getInfoInstalacion(id_instalacion);
-                                            objMikrotik.conectar( this.getIdSucursal(rsInfoIncta), ip );
-                                            objMikrotik.actualizarInstalacionEnServidor(id_instalacion);
-                                            objMikrotik.MikrotikCerrar();
+                                    } else {    //    revision general y demas
+
+                                        ok = false;
+                                        msg = "Error: empleado no dispone de una bodega para personalizaciones (utilizada para ordenes de trabajo), contáctese con el jefe de sucursal, para que le asigne una bodega.";
+                                        if (id_bodega_empleado.compareTo("") != 0) {
+
+                                            String resultado = objActivo.validar_personalizacion(idsActivos, idsActivosRet, tipo_trabajo, bodega_cliente[0], id_instalacion, "" + id_sucursal, id_bodega_empleado, ordenTrabajo.getRemoteAddr(), observacion, id_orden_trabajo);
+                                            id_personalizacion = resultado.split(";");
+                                            msg = id_personalizacion[1];
+                                            if (id_personalizacion[3].compareTo("-1") != 0 && id_personalizacion[2].compareTo("-1") != 0) {
+                                                ok = true;
+                                                if (objInstalacion.setactualizar(id_instalacion, id_orden_trabajo, id_sector, direccion, ip, mac_ant, idsActivosRet, receptor_ant, mac_nuevo,
+                                                        idsActivos, receptor_nuevo, porcentaje_senal, antena_acoplada, latitud, longitud, altura, altura_antena, latitud_gps, longitud_gps)) {
+                                                    ok = true;
+                                                    r = "Actualización de datos del registro de instalación y personalización del equipo al cliente realizada con éxito.";
+                                                } else {
+                                                    ok = false;
+                                                    msg = "Error en actualizacion de datos de instalacion " + objInstalacion.getError();
+                                                    if (id_personalizacion[2].compareTo("-1") != 0) {
+                                                        objActivo.aceptar_anular_personalizacion("" + id_sucursal, "error de orden", ordenTrabajo.getRemoteAddr(), observacion, "anular", id_personalizacion[2]);
+                                                    }
+                                                    if (id_personalizacion[3].compareTo("-1") != 0) {
+                                                        objActivo.aceptar_anular_personalizacion("" + id_sucursal, "error de orden", ordenTrabajo.getRemoteAddr(), observacion, "anular", id_personalizacion[3]);
+                                                    }
+                                                }
+                                            }
+
                                         }
 
-                                        r = "ok";
                                     }
+                                    if (ok) {
+                                        /* if (!objOrdenTrabajo.solucionar(id_sucursal, id_orden_trabajo, Parametro._usuario, Fecha.getFecha("ISO"), Fecha.getHora(), solucionado,
+                                            conformidad, atencion, recomendacion, materiales, cantidades, set_deviceclave)) {
+                                        r = "msg»" + objOrdenTrabajo.getError();
+                                    } else {*/
+                                        List sql = new ArrayList();
+                                        /*actualizar informacion en la orden de la capacidad efectiva  velocidades de carga , ordenes no procedente*/
+                                        sql.add("UPDATE tbl_orden_trabajo SET capacidad_efectiva='" + capacidad_efectiva + "',velocidad_carga='" + vel_carga + "',velocidad_descarga='" + vel_descarga + "',ot_procedente='" + procedente + "' "
+                                                + " WHERE id_orden_trabajo='" + id_orden_trabajo + "';");
+                                        sql.add("update tbl_soporte set procedente='" + procedente + "' where id_soporte=(select tmp.id_soporte from tbl_orden_trabajo as tmp where tmp.id_orden_trabajo='" + id_orden_trabajo + "');");
+                                        /* fin actualizar informacion en la orden de la capacidad efectiva  velocidades de carga , ordenes no procedente*/
+         /*actualizar informacion sisq proviene desde un certificado*/
+                                        String id_instalacion_certificado = objOrdenTrabajo.getInstalacionCertificado(id_orden_trabajo);
+                                        int croquis = archivo.ExisteArchivo("tbl_instalacion_croquis", id_instalacion_certificado, "imgcroquisnuevo");
+                                        if (croquis > 0) {
+                                            archivo.ejecutar("update tbl_documentos  "
+                                                    + " set documento=(select t1.documento from tbl_documentos as t1 where t1.tabla='tbl_instalacion_croquis' and t1.campo_tabla='imgcroquisnuevo' and t1.id_tabla='" + id_instalacion_certificado + "'), "
+                                                    + " nombre_documento=(select t1.nombre_documento from tbl_documentos as t1 where t1.tabla='tbl_instalacion_croquis' and t1.campo_tabla='imgcroquisnuevo' and t1.id_tabla='" + id_instalacion_certificado + "') "
+                                                    + " where tabla='tbl_instalacion' and campo_tabla='imgcroquis' and id_tabla='" + id_instalacion + "'");
+                                        }
+                                        sql.add("UPDATE tbl_instalacion  as i "
+                                                + " SET id_provincia=c.id_provincia,id_ciudad=c.id_canton,id_parroquia=c.id_parroquia,id_sector=c.id_sector, "
+                                                + " id_plan_actual=c.id_plan,direccion_instalacion=substring(c.direccion,0,199),convenio_pago=c.modalidad_pago,tipo_instalacion=c.tipo_instalacion "
+                                                + " FROM tbl_instalacion_certificado as c "
+                                                + " WHERE i.id_instalacion = c.id_instalacion and c.id_instalacion_certificado='" + id_instalacion_certificado + "' and c.fecha_creada>='2019-09-24';");
+                                        /*fin actualizar informacion sisq proviene desde un certificado*/
+         /*inserttar rubros adicionales de cambios de domicio orden no procedente o migraciones*/
+                                        String[] anticipos = objOrdenTrabajo.getAnticipoOrdenTrabajo(id_orden_trabajo);
+
+                                        //  cambios de domicilio
+                                        if ((tipo_trabajo.trim().compareTo("2") == 0 || tipo_trabajo.trim().compareTo("14") == 0) && procedente.trim().compareTo("true") == 0) {
+        //                                    if ( objOrdenTrabajo.getCambiosDomicilio(id_instalacion, "'2','14'", id_orden_trabajo) ) {
+//                                            if ( objPromocion.cobrarCambioDomicilio(id_instalacion) ) {
+                                                if ( objInstalacion.numCertificadosCambioDomicilioEnAnio(id_instalacion, "2,3") > 1 ) {
+                                                    int indice = (tipo_trabajo.trim().compareTo("2") == 0 ? 0 : 1);
+                                                    if (this.SetFactura(id_instalacion, costos_sector, anticipos, indice)[0].compareTo("-1") == 0) {
+                                                        sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro)VALUES ('" + id_sucursal + "','" + costos_sector[indice][0] + "' ,'" + id_instalacion + "', '" + costos_sector[indice][1] + "','" + periodo + "'::date + '1 month'::interval, '" + costos_sector[indice][2] + "','p');");
+                                                    }
+                                                }
+//                                            }
+                                        }
+
+                                        //  migraciones desde 2024 todas son gratis
+                                        /*if ((tipo_trabajo.trim().compareTo("13") == 0 || tipo_trabajo.trim().compareTo("22") == 0) && procedente.trim().compareTo("true") == 0) {
+//                                            if ( !objOrdenTrabajo.getMgracionGratuita(id_orden_trabajo) && objInstalacion.numCertificadosEnAnio(id_instalacion, "4,5") > 1 ) {
+                                            if ( objInstalacion.numCertificadosEnAnio(id_instalacion, "4,5,6") > 1 ) {
+//                                                if ( objPromocion.cobrarMigracion(id_instalacion) ) {
+                                                    int indice = (tipo_trabajo.trim().compareTo("13") == 0 ? 3 : 2);
+                                                    if (this.SetFactura(id_instalacion, costos_sector, anticipos, indice)[0].compareTo("-1") == 0) {
+                                                        sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro)VALUES ('" + id_sucursal + "','" + costos_sector[indice][0] + "' ,'" + id_instalacion + "', '" + costos_sector[indice][1] + "','" + periodo + "'::date + '1 month'::interval, '" + costos_sector[indice][2] + "','p');");
+                                                    }
+//                                                }
+                                            }
+                                        }*/
+
+                                        if (procedente.trim().compareTo("false") == 0 && tipo_trabajo.trim().compareTo("3") != 0 && tipo_trabajo.trim().compareTo("4") != 0) {
+                                            int indice = 4;
+                                            if (this.SetFactura(id_instalacion, costos_sector, anticipos, indice)[0].compareTo("-1") == 0) {
+                                                sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro)VALUES ('" + id_sucursal + "','" + costos_sector[indice][0] + "' ,'" + id_instalacion + "', '" + costos_sector[indice][1] + "','" + periodo + "'::date + '1 month'::interval, '" + costos_sector[indice][2] + "','p');");
+                                            }
+                                        }
+                                        /*inserttar rubros adicionales de cambios de domicio orden no procedente o migraciones*/
+
+                                        ///encrustado
+                                        ////kardex y asiento contable
+                                        if (!materiales.equals("")) {
+                                            sql = objOrdenTrabajo.setactualizarconsumible(id_orden_trabajo, materiales, adicionales, sql);
+                                            String detalle = "CONSUMO DE MATERIAL INSTALADO EN ORDEN DE TRABAJO CLIENTE DOCUMENTO N°. ";
+                                            sql = objOrdenTrabajo.kardexdeconsumoproducto(idproductos, cantidades, precioactual, id_sucursal, detalle, id_orden_trabajo, id_tecnico_resp, id_cliente, "Ordenes de trabajo cliente", sql);
+                                        }
+                                        ////agregar los rubos nuevos
+                                        if (listaidnuevos.compareTo("") != 0) {
+                                            listaidnuevos = listaidnuevos.substring(0, listaidnuevos.length() - 1);
+                                            listacostonuevos = listacostonuevos.substring(0, listacostonuevos.length() - 1);
+                                            listadescripcionnuevos = listadescripcionnuevos.substring(0, listadescripcionnuevos.length() - 1);
+                                            listatiposrubros = listatiposrubros.substring(0, listatiposrubros.length() - 1);
+                                            listacantidadesrubros = listacantidadesrubros.substring(0, listacantidadesrubros.length() - 1);
+                                            sql = objActivo.agregarRubroprefactura(id_sucursal, id_instalacion, listaidnuevos, listacostonuevos, listadescripcionnuevos, periodo, listatiposrubros, listacantidadesrubros, sql);
+                                        }
+                                        if (!objOrdenTrabajo.solucionar(id_sucursal, id_orden_trabajo, ordenTrabajo.getUsuarioSolucion(), Fecha.getFecha("ISO"), Fecha.getHora(), solucionado,
+                                                conformidad, atencion, recomendacion, materiales, cantidades, set_deviceclave, sql)) {
+                                            if (id_personalizacion[2].compareTo("-1") != 0) {
+                                                objActivo.aceptar_anular_personalizacion("" + id_sucursal, "error de orden", ordenTrabajo.getRemoteAddr(), observacion, "anular", id_personalizacion[2]);
+                                            }
+                                            if (id_personalizacion[3].compareTo("-1") != 0) {
+                                                objActivo.aceptar_anular_personalizacion("" + id_sucursal, "error de orden", ordenTrabajo.getRemoteAddr(), observacion, "anular", id_personalizacion[3]);
+                                            }
+                                            r = objOrdenTrabajo.getError();
+
+                                        } else {
+
+
+
+        //  el asiento de salida de suministros se lo hace al entregar al tecnico y enla venta se realiza el mismo asiento. Se reasliza solo el asiento de la venta por eso no se debe realizar ninguna reversion                                    
+
+        //                                    //  reversar suministro adicional, ya que se contabiliza nuevamente en la emision de la factura
+        //                                    if(listacantidadesrubros.compareTo("")!=0) {
+        //                                        
+        //                                        ComprobanteDiario objComprobanteDiario = new ComprobanteDiario(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
+        //                                        
+        //                                        String detalle;
+        //                                        String idProducto[] = listaidnuevos.split(",");
+        //                                        String descripcionProducto[] = listadescripcionnuevos.split(",");
+        //                                        String montos[] = listacostonuevos.split(",");
+        //                                        for (int i = 0; i < montos.length; i++) {
+        //                                            try{
+        //                                                detalle = "REVERSION DE TRASPASO DE CONSUMO DE SUMINISTROS " + descripcionProducto[i] + " POR EXCESO EN ORDEN DE TRABAJO " + numero_orden;
+        //                                                String param = "['"+objProducto.getIdPCcompras( idProducto[i] )+"','"+montos[i]+"','0'],";
+        //                                                param += "['"+idPCcostoVentas+"','0','"+montos[i]+"']";
+        //                                                ResultSet res = objComprobanteDiario.consulta("select proc_comprobanteDiario("+id_sucursal+", "+objComprobanteDiario.getNumComprobante()+", now()::date, '"+detalle+"', "+montos[i]+", array["+param+"]);");
+        ////                                                if(res.next()){
+        ////                                                    num = (res.getString(1)!=null) ? res.getInt(1) : -1;
+        ////                                                    res.close();
+        ////                                                }
+        //                                            }catch(Exception e){
+        //                                                e.printStackTrace();
+        //                                            }
+        //                                        }
+        //                                        objComprobanteDiario.cerrar();
+        //                                    }
+
+                                            File archivo_entrada = new File(Parametro.getDir(), "eordentrabajo" + Fecha.getFechaHora() + ".pdf");
+                                            String oki = ObjPdfDocumental.PdfOrdenTrabajoCliente(id_orden_trabajo, archivo_entrada);
+                                            if (oki != null && firmar_documentos.trim().compareTo("si") == 0 && obligado_firmar && firma_ordenes.compareTo("true") == 0) {
+                                                try{
+                                                    List Keys = ObjPdfDocumental.getKeys();
+                                                    Properties parametros = ObjPdfDocumental.getPropiedadesPdf(id_sucursal);
+                                                    CordenadasXY cordenadasXY = new CordenadasXY();
+                                                    List cordenadas = cordenadasXY.CordenadasXY(archivo_entrada, "_firma_responsable_");
+                                                    File archivo_salida = new File(Parametro.getDir(), "sordentrabajo" + Fecha.getFechaHora() + ".pdf");
+                                                    File archivo_firma = Firmas.ValidarFirma(archivo_entrada.getAbsolutePath(), archivo_salida.getAbsolutePath(), true, cordenadas, Keys, parametros);
+                                                    if (archivo_firma != null) {
+                                                        ok = archivo.setArchivoDocumental("tbl_orden_trabajo", id_orden_trabajo, "documento_digital", archivo_firma.getName(), archivo_firma.getAbsolutePath(), "public", "db_isp");
+                                                    }
+                                                } catch(Exception e){
+                                                    e.printStackTrace();
+                                                }
+                                            } else {
+                                                File archivo_firma = new File(Parametro.getDir(), oki);
+                                                ok = archivo.setArchivoDocumental("tbl_orden_trabajo", id_orden_trabajo, "documento_digital", archivo_firma.getName(), archivo_firma.getAbsolutePath(), "public", "db_isp");
+                                            }
+
+                                            if( modoSincronizacionMikrotiks.compareTo("apis") == 0 ) {
+                                                Mikrotik objMikrotik = new Mikrotik(Parametro.getIp(), Parametro.getPuerto(), Parametro.getDb(), Parametro.getUsuario(), Parametro.getClave());
+                                                ResultSet rsInfoIncta = objMikrotik.getInfoInstalacion(id_instalacion);
+                                                objMikrotik.conectar( this.getIdSucursal(rsInfoIncta), ip );
+                                                objMikrotik.actualizarInstalacionEnServidor(id_instalacion);
+                                                objMikrotik.MikrotikCerrar();
+                                            }
+
+                                            r = "ok";
+                                        }
+                                    } else {
+                                        r = objActivo.getError() + " - " + objInstalacion.getError() + " " + msg;
+                                    }
+                                    objActivo.ejecutar("update tbl_instalacion set puesta_tierra=" + puesta_tierra + " where id_instalacion=" + id_instalacion + " ");
                                 } else {
-                                    r = objActivo.getError() + " - " + objInstalacion.getError() + " " + msg;
+        //                            r += "^fun»_('btnRegSol').disabled=false";
                                 }
-                                objActivo.ejecutar("update tbl_instalacion set puesta_tierra=" + puesta_tierra + " where id_instalacion=" + id_instalacion + " ");
                             } else {
-    //                            r += "^fun»_('btnRegSol').disabled=false";
+                                r = "LA BODEGA DEL CLIENTE TIENE UN LIMITE EN SU BODEGA.";
                             }
-                        } else {
-                            r = "LA BODEGA DEL CLIENTE TIENE UN LIMITE EN SU BODEGA.";
                         }
                     }
+
+
+                } finally {
+                    conf.cerrar();
+                    auditoria.cerrar();
+                    objInstalacion.cerrar();
+                    objOrdenTrabajo.cerrar();
+                    objActivo.cerrar();
+                    objBodega.cerrar();
+                    objProducto.cerrar();
+        //            objAts.cerrar();
+        //            objPreinstalacion.cerrar();
+                    archivo.cerrar();
+                    objPrefactura.cerrar();
                 }
-
-
-            } finally {
-                conf.cerrar();
-                auditoria.cerrar();
-                objInstalacion.cerrar();
-                objOrdenTrabajo.cerrar();
-                objActivo.cerrar();
-                objBodega.cerrar();
-                objProducto.cerrar();
-    //            objAts.cerrar();
-    //            objPreinstalacion.cerrar();
-                archivo.cerrar();
-                objPrefactura.cerrar();
+                
             }
         
         } catch(Exception ex) {
