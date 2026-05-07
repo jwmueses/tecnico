@@ -8,13 +8,13 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -327,15 +327,26 @@ public class Xml{
     
     public boolean salvar(String nombreArchivo)
     {
-        try {
-            FileWriter fw = new FileWriter(nombreArchivo);
-            PrintWriter writer = new PrintWriter(fw);
-            writer.print(this.formatear().toString());
-            writer.close();
+        try (OutputStreamWriter writer = new OutputStreamWriter(
+                new FileOutputStream(nombreArchivo), StandardCharsets.UTF_8)) {
+
+            String contenidoXml = this.formatear().toString();
+            writer.write(contenidoXml);
             return true;
-	} catch (IOException e) {
+
+        } catch (Exception e) {
+            e.printStackTrace();
             this.error = e.getMessage();
-	}
+        }
+//        try {
+//            FileWriter fw = new FileWriter(nombreArchivo);
+//            PrintWriter writer = new PrintWriter(fw);
+//            writer.print(this.formatear().toString());
+//            writer.close();
+//            return true;
+//	} catch (IOException e) {
+//            this.error = e.getMessage();
+//	}
         return false;
     }
     
