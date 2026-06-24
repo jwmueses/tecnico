@@ -14,10 +14,7 @@ package ec.saitel.api.util;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  *

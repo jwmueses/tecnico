@@ -483,7 +483,9 @@ public class OrdenTrabajoDao
                                                 if ( objInstalacion.numCertificadosCambioDomicilioEnAnio(id_instalacion, "2,3") > 1 ) {
                                                     int indice = (tipo_trabajo.trim().compareTo("2") == 0 ? 0 : 1);
                                                     if (this.SetFactura(id_instalacion, costos_sector, anticipos, indice)[0].compareTo("-1") == 0) {
-                                                        sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro)VALUES ('" + id_sucursal + "','" + costos_sector[indice][0] + "' ,'" + id_instalacion + "', '" + costos_sector[indice][1] + "','" + periodo + "'::date + '1 month'::interval, '" + costos_sector[indice][2] + "','p');");
+                                                        sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro, periodo, monto, tiporubro) VALUES ('" + id_sucursal + "','" + costos_sector[indice][0] 
+                                                                + "' ,'" + id_instalacion + "', '" + costos_sector[indice][1] + "','" + periodo + "'::date + '1 month'::interval, '" + costos_sector[indice][2] 
+                                                                + "','p') ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;");
                                                     }
                                                 }
 //                                            }
@@ -496,7 +498,7 @@ public class OrdenTrabajoDao
 //                                                if ( objPromocion.cobrarMigracion(id_instalacion) ) {
                                                     int indice = (tipo_trabajo.trim().compareTo("13") == 0 ? 3 : 2);
                                                     if (this.SetFactura(id_instalacion, costos_sector, anticipos, indice)[0].compareTo("-1") == 0) {
-                                                        sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro)VALUES ('" + id_sucursal + "','" + costos_sector[indice][0] + "' ,'" + id_instalacion + "', '" + costos_sector[indice][1] + "','" + periodo + "'::date + '1 month'::interval, '" + costos_sector[indice][2] + "','p');");
+                                                        sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto, tiporubro)VALUES ('" + id_sucursal + "','" + costos_sector[indice][0] + "' ,'" + id_instalacion + "', '" + costos_sector[indice][1] + "','" + periodo + "'::date + '1 month'::interval, '" + costos_sector[indice][2] + "','p') ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;");
                                                     }
 //                                                }
                                             }
@@ -505,7 +507,9 @@ public class OrdenTrabajoDao
                                         if (procedente.trim().compareTo("false") == 0 && tipo_trabajo.trim().compareTo("3") != 0 && tipo_trabajo.trim().compareTo("4") != 0) {
                                             int indice = 4;
                                             if (this.SetFactura(id_instalacion, costos_sector, anticipos, indice)[0].compareTo("-1") == 0) {
-                                                sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro)VALUES ('" + id_sucursal + "','" + costos_sector[indice][0] + "' ,'" + id_instalacion + "', '" + costos_sector[indice][1] + "','" + periodo + "'::date + '1 month'::interval, '" + costos_sector[indice][2] + "','p');");
+                                                sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto, tiporubro) VALUES ('" + id_sucursal + "','" + costos_sector[indice][0] 
+                                                        + "' ,'" + id_instalacion + "', '" + costos_sector[indice][1] + "','" + periodo + "'::date + '1 month'::interval, '" + costos_sector[indice][2] 
+                                                        + "','p') ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;");
                                             }
                                         }
                                         /*inserttar rubros adicionales de cambios de domicio orden no procedente o migraciones*/

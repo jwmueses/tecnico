@@ -595,7 +595,8 @@ public class Instalacion extends DataBase {
                             + " and id_instalacion not in (select id_instalacion from tbl_rubro_instalacion where id_rubro=" + idRubro + " and id_instalacion=" + pk + ");");
                     st.executeUpdate("insert into tbl_prefactura_rubro(id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto) "
                             + "select I.id_sucursal, " + idRubro + ", I.id_instalacion, '" + rubro + "', P.periodo, " + monto
-                            + " from tbl_instalacion as I inner join tbl_prefactura as P on P.id_instalacion=I.id_instalacion where fecha_emision is null and I.id_instalacion=" + pk + ";");
+                            + " from tbl_instalacion as I inner join tbl_prefactura as P on P.id_instalacion=I.id_instalacion where fecha_emision is null and I.id_instalacion=" 
+                            + pk + " ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;");
                     st.executeUpdate("update tbl_instalacion set factura_credito=true,set_convenio_cuenta=true where id_instalacion=" + pk + ";");
                 }
 
@@ -1229,7 +1230,8 @@ public class Instalacion extends DataBase {
                     + " and id_instalacion not in (select id_instalacion from tbl_rubro_instalacion where id_rubro=" + idRubro + " and id_instalacion=" + id + ");");
             sql.add("insert into tbl_prefactura_rubro(id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto) "
                     + "select I.id_sucursal, " + idRubro + ", I.id_instalacion, '" + rubro + "', P.periodo, " + monto
-                    + " from tbl_instalacion as I inner join tbl_prefactura as P on P.id_instalacion=I.id_instalacion where fecha_emision is null and I.id_instalacion=" + id + ";");
+                    + " from tbl_instalacion as I inner join tbl_prefactura as P on P.id_instalacion=I.id_instalacion where fecha_emision is null and I.id_instalacion=" 
+                    + id + " ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;");
             sql.add("update tbl_instalacion set factura_credito=true,set_convenio_cuenta=true where id_instalacion=" + id + ";");
 
         } else if (setConvenio.compareTo("false") == 0) {
@@ -1847,7 +1849,9 @@ public class Instalacion extends DataBase {
                                 costo_restante = (valor_plan_actual + valor_plan_nuevo) - costo_actual;
                                 costo_restante = Addons.redondear(costo_restante, 2);
                                 if (costo_restante > 0) {
-                                    this.insert("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro)VALUES ('" + id_sucursal + "','15' ,'" + id_instalacion + "', 'CAMBIO DE PLAN','" + periodo + "'::date + '1 month'::interval, '" + costo_restante + "','p');");
+                                    this.insert("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto, tiporubro) VALUES ('" + id_sucursal + "','15' ,'" 
+                                            + id_instalacion + "', 'Valor proporcional correspondiente a días de navegación con nuevo plan "+plan[2]+"','" + periodo + "'::date + '1 month'::interval, '" + costo_restante 
+                                            + "','p') ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;");
                                 } else {
                                     costo_restante = 0;
                                 }
@@ -1907,12 +1911,13 @@ public class Instalacion extends DataBase {
     }
 
     public String[] DatosPlanNuevo(String id_plan_actual, String id_sucursal) {
-        String resultado[] = {"", ""};
-        ResultSet rs = this.consulta("select t.id_plan_servicio,t.costo_plan from vta_plan_tarifa as t where t.id_plan_servicio='" + id_plan_actual + "' and t.id_sucursal='" + id_sucursal + "';");
+        String resultado[] = {"", "", ""};
+        ResultSet rs = this.consulta("select t.id_plan_servicio,t.costo_plan, plan from vta_plan_tarifa as t where t.id_plan_servicio='" + id_plan_actual + "' and t.id_sucursal='" + id_sucursal + "';");
         try {
             if (rs.next()) {
                 resultado[0] = (rs.getString("id_plan_servicio") != null ? rs.getString("id_plan_servicio") : "");
                 resultado[1] = (rs.getString("costo_plan") != null ? rs.getString("costo_plan") : "");
+                resultado[2] = (rs.getString("plan") != null ? rs.getString("plan") : "");
             }
         } catch (Exception e) {
             System.out.println("Error al obtener datos del plan nuevo");
@@ -1970,7 +1975,9 @@ public class Instalacion extends DataBase {
                         sql.add("update tbl_instalacion_cambio_plan set id_plan_servicio=" + id_plan_servicio + ",tipo_instalacioncp='" + idtipoins + "',plan_pendiente=false where id_instalacion_cambio_plan=" + id_instalacion_cambio_plan + ";");
                         if (costo_nuevo > costo_actual) {
                             costo_restante = costo_nuevo - costo_actual;
-                            sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro)VALUES ('" + id_sucursal + "','15' ,'" + id_instalacion + "', 'CAMBIO DE PLAN','" + periodo + "'::date + '1 month'::interval, '" + costo_restante + "','p');");
+                            sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto, tiporubro)VALUES ('" + id_sucursal + "','15' ,'" 
+                                    + id_instalacion + "', 'Valor proporcional correspondiente a días de navegación con nuevo plan "+plan[2]+"','" + periodo + "'::date + '1 month'::interval, '" + costo_restante 
+                                    + "','p') ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;");
                         }
                     } else if (fecha_prefactura.before(fecha_periodo) && prefactura[2].trim().compareTo("") != 0) {
                         sql.add("update tbl_instalacion_cambio_plan set id_plan_servicio=" + id_plan_servicio + ",tipo_instalacioncp='" + idtipoins + "',plan_pendiente=false where id_instalacion_cambio_plan=" + id_instalacion_cambio_plan + ";");
@@ -3025,23 +3032,26 @@ public class Instalacion extends DataBase {
     public String getPromocionCompleta(String id_instalacion, String id_prefactura) {
         String sql = "";
         if (this.GetCumplioPromocionInstalacion(id_instalacion)) {
-            sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro) "
-                    + " select tmp.id_sucursal,25,tmp.id_instalacion,'Servicio de Instalacion',tmp.periodo,(select tmp1.costo_instalacion_cobro from  vta_instalacion_promocion_contrato as tmp1 where tmp1.id_instalacion=tmp.id_instalacion limit 1),'p' from vta_prefactura as tmp where tmp.id_prefactura='" + id_prefactura + "';";
+            sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto, tiporubro) "
+                    + " select tmp.id_sucursal,25,tmp.id_instalacion,'Servicio de Instalacion',tmp.periodo,(select tmp1.costo_instalacion_cobro from vta_instalacion_promocion_contrato as tmp1 where tmp1.id_instalacion=tmp.id_instalacion limit 1),'p' from vta_prefactura as tmp where tmp.id_prefactura='" 
+                    + id_prefactura + "' ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;";
         }
         //if (sql.trim().compareTo("") == 0) {
 //            if (this.GetCumplioRenovacionContrato(id_instalacion)) {
 //                sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto, tiporubro) "
-//                        + " select tmp.id_sucursal,25,tmp.id_instalacion,'Instalacion de equipos',tmp.periodo, renovacion_costo_facturado / 1.12 ,'p' from vta_prefactura as tmp where tmp.id_prefactura='" + id_prefactura + "';";
+//                        + " select tmp.id_sucursal,25,tmp.id_instalacion,'Instalacion de equipos',tmp.periodo, renovacion_costo_facturado / 1.12 ,'p' from vta_prefactura as tmp where tmp.id_prefactura='" + id_prefactura + "' ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;";
 //            }
 //            if (sql.trim().compareTo("") == 0) {
                 if (this.GetCumplioPromocionMigracion(id_instalacion)) {
                     sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro) "
-                            + " select tmp.id_sucursal,19,tmp.id_instalacion,'Servicio de Migracion',tmp.periodo,(select tmp1.costo_instalacion_cobro from  vta_certificado_promocion_contrato as tmp1 where tmp1.id_instalacion=tmp.id_instalacion order by id_certificados_isp1 desc limit 1),'p' from vta_prefactura as tmp where tmp.id_prefactura='" + id_prefactura + "';";
+                            + " select tmp.id_sucursal,19,tmp.id_instalacion,'Servicio de Migracion',tmp.periodo,(select tmp1.costo_instalacion_cobro from  vta_certificado_promocion_contrato as tmp1 where tmp1.id_instalacion=tmp.id_instalacion order by id_certificados_isp1 desc limit 1),'p' from vta_prefactura as tmp where tmp.id_prefactura='" 
+                            + id_prefactura + "' ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;";
                 }
 //                if (sql.trim().compareTo("") == 0) {
                     if (this.GetCumplioPromocionDomicilio(id_instalacion)) {
-                        sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro) "
-                                + " select tmp.id_sucursal,16,tmp.id_instalacion,'Servicio de Cambio de domicilio',tmp.periodo,(select tmp1.costo_instalacion_cobro from  vta_certificado_promocion_contrato as tmp1 where tmp1.id_instalacion=tmp.id_instalacion order by id_certificados_isp1 desc limit 1),'p' from vta_prefactura as tmp where tmp.id_prefactura='" + id_prefactura + "';";
+                        sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto, tiporubro) "
+                                + " select tmp.id_sucursal,16,tmp.id_instalacion,'Servicio de Cambio de domicilio',tmp.periodo,(select tmp1.costo_instalacion_cobro from  vta_certificado_promocion_contrato as tmp1 where tmp1.id_instalacion=tmp.id_instalacion order by id_certificados_isp1 desc limit 1),'p' from vta_prefactura as tmp where tmp.id_prefactura='" 
+                                + id_prefactura + "' ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;";
                     }
 //                }
 //            }
@@ -3052,26 +3062,26 @@ public class Instalacion extends DataBase {
     public String getPromocionCompleta(String idInstalacion) {
         String sql = "";
         if (this.GetCumplioPromocionInstalacion(idInstalacion)) {
-            sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto, tiporubro)  \n" +
+            sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto, tiporubro)  \n" +
                     "select id_sucursal, 25, id_instalacion, 'Servicio de Instalacion', date_trunc('month', now())::date, costo_instalacion_cobro, 'p' \n" +
-                    "from  vta_instalacion_promocion_contrato where id_instalacion="+idInstalacion+" limit 1";
+                    "from  vta_instalacion_promocion_contrato where id_instalacion="+idInstalacion+" limit 1  ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;";
         }
         //if (sql.trim().compareTo("") == 0) {
 //            if (this.GetCumplioRenovacionContrato(id_instalacion)) {
 //                sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto, tiporubro) "
-//                        + " select tmp.id_sucursal,25,tmp.id_instalacion,'Instalacion de equipos',tmp.periodo, renovacion_costo_facturado / 1.12 ,'p' from vta_prefactura as tmp where tmp.id_prefactura='" + id_prefactura + "';";
+//                        + " select tmp.id_sucursal,25,tmp.id_instalacion,'Instalacion de equipos',tmp.periodo, renovacion_costo_facturado / 1.12 ,'p' from vta_prefactura as tmp where tmp.id_prefactura='" + id_prefactura + "' ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;";
 //            }
 //            if (sql.trim().compareTo("") == 0) {
                 if (this.GetCumplioPromocionMigracion(idInstalacion)) {
-                    sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro) \n" +
+                    sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto, tiporubro) \n" +
                             "select id_sucursal, 19, id_instalacion, 'Servicio de Migracion', date_trunc('month', now())::date, costo_instalacion_cobro, 'p' \n" +
-                            "from vta_certificado_promocion_contrato where id_instalacion="+idInstalacion+" order by id_certificados_isp1 desc limit 1";
+                            "from vta_certificado_promocion_contrato where id_instalacion="+idInstalacion+" order by id_certificados_isp1 desc limit 1  ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;";
                 }
 //                if (sql.trim().compareTo("") == 0) {
                     if (this.GetCumplioPromocionDomicilio(idInstalacion)) {
-                        sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro,id_instalacion, rubro,periodo, monto,tiporubro) \n" +
+                        sql += "INSERT INTO tbl_prefactura_rubro( id_sucursal, id_rubro, id_instalacion, rubro, periodo, monto, tiporubro) \n" +
                                 "select id_sucursal, 16, id_instalacion, 'Servicio de Cambio de domicilio', date_trunc('month', now())::date, costo_instalacion_cobro, 'p'\n" +
-                                "from vta_certificado_promocion_contrato  where id_instalacion="+idInstalacion+" order by id_certificados_isp1 desc limit 1";
+                                "from vta_certificado_promocion_contrato  where id_instalacion="+idInstalacion+" order by id_certificados_isp1 desc limit 1  ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;";
                     }
 //                }
 //            }

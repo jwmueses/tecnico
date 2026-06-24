@@ -1721,7 +1721,9 @@ public class Activo extends DataBase {
             con.setAutoCommit(false);
             Statement st = con.createStatement();
             for (int i = 0; i < codigos.length; i++) {
-                st.executeUpdate("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_instalacion, rubro,periodo, monto,tiporubro,idproductos,canproductos,inventariar)VALUES ('" + id_sucursal + "', '" + id_instalacion + "', '" + descripciones[i] + "','" + periodo + "'::date + '1 month'::interval, '" + cantidades[i] + "', '" + tiposrubos[i] + "', '" + codigos[i] + "', '" + cantidadespro[i] + "','false');");
+                st.executeUpdate("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_instalacion, rubro, periodo, monto, tiporubro, idproductos, canproductos, inventariar) VALUES ('" + id_sucursal 
+                        + "', '" + id_instalacion + "', '" + descripciones[i] + "','" + periodo + "'::date + '1 month'::interval, '" + cantidades[i] + "', '" + tiposrubos[i] + "', '" + codigos[i] 
+                        + "', '" + cantidadespro[i] + "','false') ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;");
             }
             st.executeUpdate("update tbl_prefactura set recalcular=true where fecha_emision is null and id_instalacion=" + id_instalacion);
             con.commit();
@@ -1753,7 +1755,7 @@ public class Activo extends DataBase {
             for (int i = 0; i < codigos.length; i++) {
                 sql.add("INSERT INTO tbl_prefactura_rubro( id_sucursal, id_instalacion, rubro, periodo, monto, tiporubro, idproductos, canproductos, inventariar) VALUES('" + 
                         id_sucursal + "', '" + id_instalacion + "', '" + descripciones[i] + "', '" + periodo + "'::date + '1 month'::interval, '" + cantidades[i] + "', '" + 
-                        tiposrubos[i] + "', '" + codigos[i] + "', '" + cantidadespro[i] + "', 'false');");
+                        tiposrubos[i] + "', '" + codigos[i] + "', '" + cantidadespro[i] + "', 'false') ON CONFLICT (id_instalacion, id_rubro, periodo, monto, idproductos) DO NOTHING;");
             }
             sql.add("update tbl_prefactura set recalcular=true where fecha_emision is null and id_instalacion=" + id_instalacion);
         } catch (Exception e) {
